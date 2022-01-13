@@ -1,0 +1,32 @@
+subprojects {
+    apply plugin: 'java'
+
+    group 'com.epam'
+    version '1.0-SNAPSHOT'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation 'org.springframework:spring-core:5.3.14'
+        implementation 'org.springframework:spring-context:5.3.14'
+
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    wrapper {
+        gradleVersion '7.3.3'
+    }
+}
