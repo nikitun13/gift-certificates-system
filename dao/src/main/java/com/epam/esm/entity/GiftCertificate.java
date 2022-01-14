@@ -10,18 +10,18 @@ public class GiftCertificate {
     private String description;
     private Long price;
     private Integer duration;
-    private LocalDateTime createTime;
-    private LocalDateTime lastUpdateTime;
+    private LocalDateTime createDate;
+    private LocalDateTime lastUpdateDate;
 
     public GiftCertificate(Long id, String name, String description, Long price,
-                           Integer duration, LocalDateTime createTime, LocalDateTime lastUpdateTime) {
+                           Integer duration, LocalDateTime createDate, LocalDateTime lastUpdateDate) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.duration = duration;
-        this.createTime = createTime;
-        this.lastUpdateTime = lastUpdateTime;
+        this.createDate = createDate;
+        this.lastUpdateDate = lastUpdateDate;
     }
 
     public GiftCertificate() {
@@ -51,12 +51,12 @@ public class GiftCertificate {
         return this.duration;
     }
 
-    public LocalDateTime getCreateTime() {
-        return this.createTime;
+    public LocalDateTime getCreateDate() {
+        return this.createDate;
     }
 
-    public LocalDateTime getLastUpdateTime() {
-        return this.lastUpdateTime;
+    public LocalDateTime getLastUpdateDate() {
+        return this.lastUpdateDate;
     }
 
     public void setId(Long id) {
@@ -79,12 +79,12 @@ public class GiftCertificate {
         this.duration = duration;
     }
 
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
+    public void setCreateDate(LocalDateTime createDate) {
+        this.createDate = createDate;
     }
 
-    public void setLastUpdateTime(LocalDateTime lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
+    public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
     }
 
     @Override
@@ -97,13 +97,13 @@ public class GiftCertificate {
                 && Objects.equals(description, that.description)
                 && Objects.equals(price, that.price)
                 && Objects.equals(duration, that.duration)
-                && Objects.equals(createTime, that.createTime)
-                && Objects.equals(lastUpdateTime, that.lastUpdateTime);
+                && Objects.equals(createDate, that.createDate)
+                && Objects.equals(lastUpdateDate, that.lastUpdateDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, price, duration, createTime, lastUpdateTime);
+        return Objects.hash(id, name, description, price, duration, createDate, lastUpdateDate);
     }
 
     @Override
@@ -114,8 +114,8 @@ public class GiftCertificate {
                 + ", description='" + description + '\''
                 + ", price=" + price
                 + ", duration=" + duration
-                + ", createTime=" + createTime
-                + ", lastUpdateTime=" + lastUpdateTime
+                + ", createDate=" + createDate
+                + ", lastUpdateDate=" + lastUpdateDate
                 + '}';
     }
 
@@ -126,8 +126,8 @@ public class GiftCertificate {
         private String description;
         private Long price;
         private Integer duration;
-        private LocalDateTime createTime;
-        private LocalDateTime lastUpdateTime;
+        private LocalDateTime createDate;
+        private LocalDateTime lastUpdateDate;
 
         GiftCertificateBuilder() {
         }
@@ -157,18 +157,18 @@ public class GiftCertificate {
             return this;
         }
 
-        public GiftCertificateBuilder createTime(LocalDateTime createTime) {
-            this.createTime = createTime;
+        public GiftCertificateBuilder createDate(LocalDateTime createDate) {
+            this.createDate = createDate;
             return this;
         }
 
-        public GiftCertificateBuilder lastUpdateTime(LocalDateTime lastUpdateTime) {
-            this.lastUpdateTime = lastUpdateTime;
+        public GiftCertificateBuilder lastUpdateDate(LocalDateTime lastUpdateDate) {
+            this.lastUpdateDate = lastUpdateDate;
             return this;
         }
 
         public GiftCertificate build() {
-            return new GiftCertificate(id, name, description, price, duration, createTime, lastUpdateTime);
+            return new GiftCertificate(id, name, description, price, duration, createDate, lastUpdateDate);
         }
     }
 }
