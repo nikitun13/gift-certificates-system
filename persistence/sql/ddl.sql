@@ -10,14 +10,14 @@ CREATE TABLE gift_certificate
     description      TEXT         NOT NULL,
     price            BIGINT       NOT NULL,
     duration         INT          NOT NULL,
-    create_date      TIMESTAMP    NOT NULL DEFAULT LOCALTIMESTAMP,
-    last_update_date TIMESTAMP
+    create_date      TIMESTAMP    NOT NULL,
+    last_update_date TIMESTAMP    NOT NULL
 );
 
 CREATE TABLE tag
 (
     id   BIGSERIAL PRIMARY KEY,
-    name VARCHAR(128) NOT NULL
+    name VARCHAR(128) UNIQUE NOT NULL
 );
 
 CREATE TABLE gift_certificate_tag
