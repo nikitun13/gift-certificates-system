@@ -3,6 +3,13 @@ package com.epam.esm.dao;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Describes the interface of the generic {@code dao}, which provides
+ * basic CRUD (Create, Reed, Update, Delete) operations with entities in the database.
+ *
+ * @param <K> id (key) of the entity.
+ * @param <E> entity itself.
+ */
 public interface BaseDao<K, E> {
 
     /**
