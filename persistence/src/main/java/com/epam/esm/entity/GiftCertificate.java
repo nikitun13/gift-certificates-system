@@ -1,7 +1,6 @@
 package com.epam.esm.entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 
 public class GiftCertificate {
@@ -13,10 +12,9 @@ public class GiftCertificate {
     private Integer duration;
     private LocalDateTime createDate;
     private LocalDateTime lastUpdateDate;
-    private List<Tag> tags;
 
-    public GiftCertificate(Long id, String name, String description, Long price, Integer duration,
-                           LocalDateTime createDate, LocalDateTime lastUpdateDate, List<Tag> tags) {
+    public GiftCertificate(Long id, String name, String description, Long price,
+                           Integer duration, LocalDateTime createDate, LocalDateTime lastUpdateDate) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -24,7 +22,6 @@ public class GiftCertificate {
         this.duration = duration;
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
-        this.tags = tags;
     }
 
     public GiftCertificate() {
@@ -62,10 +59,6 @@ public class GiftCertificate {
         return lastUpdateDate;
     }
 
-    public List<Tag> getTags() {
-        return tags;
-    }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -94,10 +87,6 @@ public class GiftCertificate {
         this.lastUpdateDate = lastUpdateDate;
     }
 
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -109,13 +98,12 @@ public class GiftCertificate {
                 && Objects.equals(price, that.price)
                 && Objects.equals(duration, that.duration)
                 && Objects.equals(createDate, that.createDate)
-                && Objects.equals(lastUpdateDate, that.lastUpdateDate)
-                && Objects.equals(tags, that.tags);
+                && Objects.equals(lastUpdateDate, that.lastUpdateDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, price, duration, createDate, lastUpdateDate, tags);
+        return Objects.hash(id, name, description, price, duration, createDate, lastUpdateDate);
     }
 
     @Override
@@ -128,7 +116,6 @@ public class GiftCertificate {
                 + ", duration=" + duration
                 + ", createDate=" + createDate
                 + ", lastUpdateDate=" + lastUpdateDate
-                + ", tags=" + tags
                 + '}';
     }
 
@@ -141,7 +128,6 @@ public class GiftCertificate {
         private Integer duration;
         private LocalDateTime createDate;
         private LocalDateTime lastUpdateDate;
-        private List<Tag> tags;
 
         GiftCertificateBuilder() {
         }
@@ -181,13 +167,8 @@ public class GiftCertificate {
             return this;
         }
 
-        public GiftCertificateBuilder tags(List<Tag> tags) {
-            this.tags = tags;
-            return this;
-        }
-
         public GiftCertificate build() {
-            return new GiftCertificate(id, name, description, price, duration, createDate, lastUpdateDate, tags);
+            return new GiftCertificate(id, name, description, price, duration, createDate, lastUpdateDate);
         }
     }
 }
