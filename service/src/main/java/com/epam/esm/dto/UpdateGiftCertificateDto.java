@@ -5,10 +5,16 @@ import com.epam.esm.dto.constaints.CreateGiftCertificateConstraintsGroup;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 public record UpdateGiftCertificateDto(
+
+        @NotNull(groups = CreateGiftCertificateConstraintsGroup.class,
+                message = "id can't be null")
+        @Positive(message = "id can't be negative")
+        Long id,
 
         @NotNull(groups = CreateGiftCertificateConstraintsGroup.class,
                 message = "name can't be null")
