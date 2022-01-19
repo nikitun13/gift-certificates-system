@@ -34,8 +34,9 @@ public interface GiftCertificateService {
      * All fields are optional, updates only required fields.
      *
      * @param updateGiftCertificateDto dto for update.
+     * @param id                       {@code id} of the entity to be updated.
      */
-    void update(UpdateGiftCertificateDto updateGiftCertificateDto);
+    void update(UpdateGiftCertificateDto updateGiftCertificateDto, Long id);
 
     /**
      * Deletes entity by its {@code id}.

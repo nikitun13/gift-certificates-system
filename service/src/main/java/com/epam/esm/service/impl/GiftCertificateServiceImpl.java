@@ -44,8 +44,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public void update(UpdateGiftCertificateDto updateGiftCertificateDto) {
+    public void update(UpdateGiftCertificateDto updateGiftCertificateDto, Long id) {
         GiftCertificate entity = updateGiftCertificateDtoMapper.mapToEntity(updateGiftCertificateDto);
+        entity.setId(id);
         LocalDateTime now = LocalDateTime.now();
         entity.setLastUpdateDate(now);
         giftCertificateDao.update(entity);

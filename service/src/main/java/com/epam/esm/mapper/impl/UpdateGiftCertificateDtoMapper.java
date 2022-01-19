@@ -12,14 +12,12 @@ public class UpdateGiftCertificateDtoMapper implements Mapper<GiftCertificate, U
 
     @Override
     public GiftCertificate mapToEntity(UpdateGiftCertificateDto dto) {
-        var id = dto.id();
         var name = dto.name();
         var description = dto.description();
         var price = dto.price();
         var duration = dto.duration();
 
         return GiftCertificate.builder()
-                .id(id)
                 .name(name)
                 .description(description)
                 .price(price)
@@ -30,7 +28,6 @@ public class UpdateGiftCertificateDtoMapper implements Mapper<GiftCertificate, U
     @Override
     public UpdateGiftCertificateDto mapToDto(GiftCertificate entity) {
         return new UpdateGiftCertificateDto(
-                entity.getId(),
                 entity.getName(),
                 entity.getDescription(),
                 entity.getPrice(),

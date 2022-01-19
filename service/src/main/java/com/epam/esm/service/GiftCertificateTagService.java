@@ -17,8 +17,9 @@ public interface GiftCertificateTagService {
      * with new {@code Tags}. Not existing tags will be created.
      *
      * @param updateGiftCertificateDto {@code dto} for updating {@code GiftCertificate}.
+     * @param giftCertificateId        {@code id} of the {@code GiftCertificate}.
      */
-    void update(UpdateGiftCertificateDto updateGiftCertificateDto);
+    void update(UpdateGiftCertificateDto updateGiftCertificateDto, Long giftCertificateId);
 
     /**
      * Creates {@code GiftCertificate} entity. Creates many-to-many relationship

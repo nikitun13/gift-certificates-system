@@ -31,9 +31,8 @@ public class GiftCertificateTagServiceImpl implements GiftCertificateTagService 
 
     @Override
     @Transactional
-    public void update(UpdateGiftCertificateDto updateGiftCertificateDto) {
-        giftCertificateService.update(updateGiftCertificateDto);
-        Long giftCertificateId = updateGiftCertificateDto.id();
+    public void update(UpdateGiftCertificateDto updateGiftCertificateDto, Long giftCertificateId) {
+        giftCertificateService.update(updateGiftCertificateDto, giftCertificateId);
         updateGiftCertificateDto.tags().stream()
                 .map(tagService::createIfNotExists)
                 .map(TagDto::id)

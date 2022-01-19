@@ -161,7 +161,6 @@ class GiftCertificateServiceImplTest {
     @Tag("create")
     void shouldReturnCreatedEntityWithId() {
         UpdateGiftCertificateDto createNewCocaColaCertificateDto = new UpdateGiftCertificateDto(
-                null,
                 cocaColaCertificateDto.name(),
                 cocaColaCertificateDto.description(),
                 cocaColaCertificateDto.price(),
