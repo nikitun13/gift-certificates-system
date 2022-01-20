@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -93,7 +92,7 @@ public class GiftCertificateDaoImpl extends AbstractDao<GiftCertificate> impleme
     @Override
     protected PreparedStatementCreator buildInsertPreparedStatement(GiftCertificate entity) {
         return con -> {
-            PreparedStatement preparedStatement = con.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatement = con.prepareStatement(INSERT_SQL, new String[]{ID_COLUMN_NAME});
 
             var name = entity.getName();
             var description = entity.getDescription();
