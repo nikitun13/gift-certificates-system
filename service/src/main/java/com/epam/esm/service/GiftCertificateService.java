@@ -4,6 +4,7 @@ import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -54,4 +55,6 @@ public interface GiftCertificateService {
      * @return created entity that mapped to {@link GiftCertificateDto}.
      */
     GiftCertificateDto create(UpdateGiftCertificateDto createGiftCertificateDto);
+
+    List<GiftCertificateDto> findByParams(Map<String, String> params, List<String> orderBy);
 }

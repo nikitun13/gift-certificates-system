@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -65,5 +66,12 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         entity.setLastUpdateDate(now);
         giftCertificateDao.create(entity);
         return giftCertificateDtoMapper.mapToDto(entity);
+    }
+
+    @Override
+    public List<GiftCertificateDto> findByParams(Map<String, String> params, List<String> orderBy) {
+        return giftCertificateDao.findByParams(params, orderBy).stream()
+                .map(giftCertificateDtoMapper::mapToDto)
+                .toList();
     }
 }
