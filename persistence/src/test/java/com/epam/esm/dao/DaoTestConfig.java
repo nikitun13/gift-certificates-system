@@ -3,6 +3,7 @@ package com.epam.esm.dao;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -15,6 +16,7 @@ import javax.sql.DataSource;
 public class DaoTestConfig {
 
     @Bean
+    @Primary
     public DataSource testDataSource() {
         return new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
@@ -24,11 +26,13 @@ public class DaoTestConfig {
     }
 
     @Bean
+    @Primary
     public JdbcTemplate testJdbcTemplate() {
         return new JdbcTemplate(testDataSource());
     }
 
     @Bean
+    @Primary
     public DataSourceTransactionManager dataSourceTransactionManager() {
         return new DataSourceTransactionManager(testDataSource());
     }

@@ -19,12 +19,15 @@ import static java.util.stream.Collectors.toMap;
 
 public abstract class AbstractDao<E> {
 
+    protected static final String WHERE_SQL = " WHERE ";
+    protected static final String ORDER_BY_SQL = " ORDER BY ";
+    protected static final String AND_SQL = " AND ";
+    protected static final String COMMA_DELIMITER = ", ";
     protected static final String FIELD_EQUALS_SQL_FORMAT = "%s = ?";
-    protected static final String DELETE_SQL_FORMAT = "DELETE FROM %s WHERE %s = ?";
-
-    private static final String UPDATE_ARGS_DELIMITER = ", ";
-    private static final String UPDATE_TABLE_SQL_FORMAT = "UPDATE %s SET ";
-    private static final String WHERE_ID_SQL_FORMAT = " WHERE %s = ?";
+    protected static final String FIELD_ILIKE_SQL_FORMAT = "%s ILIKE ?";
+    protected static final String UPDATE_TABLE_SQL_FORMAT = "UPDATE %s SET ";
+    protected static final String WHERE_FIELD_EQUALS_SQL_FORMAT = WHERE_SQL + FIELD_EQUALS_SQL_FORMAT;
+    protected static final String DELETE_SQL_FORMAT = "DELETE FROM %s" + WHERE_FIELD_EQUALS_SQL_FORMAT;
 
     protected final JdbcTemplate jdbcTemplate;
     protected final RowMapper<E> rowMapper;
@@ -64,18 +67,29 @@ public abstract class AbstractDao<E> {
                 .collect(toMap(Entry::getKey, Entry::getValue));
 
         String prefix = UPDATE_TABLE_SQL_FORMAT.formatted(getTableName());
-        String suffix = WHERE_ID_SQL_FORMAT.formatted(getIdColumnName());
+        String suffix = WHERE_FIELD_EQUALS_SQL_FORMAT.formatted(getIdColumnName());
 
         String sql = updatableColumnNamesVsArgs.keySet()
                 .stream()
                 .map(FIELD_EQUALS_SQL_FORMAT::formatted)
-                .collect(joining(UPDATE_ARGS_DELIMITER, prefix, suffix));
+                .collect(joining(COMMA_DELIMITER, prefix, suffix));
 
         ArrayList<Object> objects = new ArrayList<>(updatableColumnNamesVsArgs.values());
         objects.add(id);
         Object[] args = objects.toArray();
 
         return jdbcTemplate.update(sql, args);
+    }
+
+    protected String camelToSnakeCase(String str) {
+        return str.replaceAll("([a-z])([A-Z])", "$1_$2")
+                .toLowerCase();
+    }
+
+    protected String createOrderingSqlString(String field) {
+        return field.startsWith("-")
+                ? field.substring(1) + " DESC"
+                : field;
     }
 
     protected abstract Map<String, Object> getMapOfAllColumnNamesVsArgs(E entity);
