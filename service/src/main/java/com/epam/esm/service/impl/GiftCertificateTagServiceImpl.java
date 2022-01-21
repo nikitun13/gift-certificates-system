@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GiftCertificateTagServiceImpl implements GiftCertificateTagService {
@@ -52,5 +53,16 @@ public class GiftCertificateTagServiceImpl implements GiftCertificateTagService 
                 .forEach(id -> giftCertificateTagDao.create(giftCertificateId, id));
         createdGiftCertificate.tags().addAll(tags);
         return createdGiftCertificate;
+    }
+
+    @Override
+    public List<GiftCertificateDto> findGiftCertificatesByParams(Map<String, String> params,
+                                                                 List<String> orderBy) {
+        List<GiftCertificateDto> certificates = giftCertificateService.findByParams(params, orderBy);
+        for (GiftCertificateDto certificate : certificates) {
+            List<TagDto> tags = tagService.findByGiftCertificate(certificate);
+            certificate.tags().addAll(tags);
+        }
+        return certificates;
     }
 }

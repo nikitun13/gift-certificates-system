@@ -3,6 +3,9 @@ package com.epam.esm.service;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Describes interface of the service that provides transactional
  * operations with {@code GiftCertificate} and {@code Tag} entities.
@@ -28,4 +31,6 @@ public interface GiftCertificateTagService {
      * @param createGiftCertificateDto {@code dto} for creating {@code GiftCertificate}.
      */
     GiftCertificateDto create(UpdateGiftCertificateDto createGiftCertificateDto);
+
+    List<GiftCertificateDto> findGiftCertificatesByParams(Map<String, String> params, List<String> orderBy);
 }
