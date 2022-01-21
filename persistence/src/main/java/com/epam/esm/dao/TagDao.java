@@ -2,6 +2,7 @@ package com.epam.esm.dao;
 
 import com.epam.esm.entity.Tag;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,4 +22,12 @@ public interface TagDao extends BaseDao<Long, Tag> {
      * {@link Optional} contains corresponding entity, empty {@link Optional} otherwise.
      */
     Optional<Tag> findByName(String name);
+
+    /**
+     * Finds all {@code Tags} by {@code GiftCertificate id}.
+     *
+     * @param id {@code id} of the {@code GiftCertificate} entity.
+     * @return list of the all {@code Tags} with the given {@code GiftCertificate id}.
+     */
+    List<Tag> findByGiftCertificateId(Long id);
 }

@@ -21,6 +21,12 @@ public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
     private static final String FIND_ALL_SQL = "SELECT id, name FROM tag";
     private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + " WHERE id = ?";
     private static final String FIND_BY_NAME_SQL = FIND_ALL_SQL + " WHERE name = ?";
+    private static final String FIND_BY_CERTIFICATE_ID_SQL = """
+            SELECT tag.id, tag.name
+            FROM tag
+                JOIN gift_certificate_tag gct ON tag.id = gct.tag_id
+                JOIN gift_certificate ON gct.gift_certificate_id = gift_certificate.id
+            WHERE gift_certificate.id = ?""";
 
     @Autowired
     public TagDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -56,6 +62,11 @@ public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
     @Override
     public Optional<Tag> findByName(String name) {
         return executeIdentifiableSelectQuery(FIND_BY_NAME_SQL, name);
+    }
+
+    @Override
+    public List<Tag> findByGiftCertificateId(Long id) {
+        return executeSelectQuery(FIND_BY_CERTIFICATE_ID_SQL, id);
     }
 
     @Override

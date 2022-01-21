@@ -131,4 +131,14 @@ class TagDaoImplTest {
 
         assertThat(actual).isEmpty();
     }
+
+    @Test
+    @org.junit.jupiter.api.Tag("findByGiftCertificateId")
+    void findByGiftCertificateId() {
+        List<Tag> expected = List.of(kfcTag, moneyCertificateTag);
+
+        List<Tag> actual = tagDao.findByGiftCertificateId(2L);
+
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
+    }
 }
