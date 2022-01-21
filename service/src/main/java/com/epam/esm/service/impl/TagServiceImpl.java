@@ -2,6 +2,7 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.CreateTagDto;
+import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.Mapper;
@@ -64,5 +65,13 @@ public class TagServiceImpl implements TagService {
     public Optional<TagDto> findByName(String name) {
         return tagDao.findByName(name)
                 .map(tagDtoMapper::mapToDto);
+    }
+
+    @Override
+    public List<TagDto> findByGiftCertificate(GiftCertificateDto giftCertificateDto) {
+        return tagDao.findByGiftCertificateId(giftCertificateDto.id())
+                .stream()
+                .map(tagDtoMapper::mapToDto)
+                .toList();
     }
 }

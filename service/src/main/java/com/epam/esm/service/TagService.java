@@ -1,6 +1,7 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.CreateTagDto;
+import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
 
 import java.util.List;
@@ -61,4 +62,13 @@ public interface TagService {
      * @return Optional {@code TagDto}.
      */
     Optional<TagDto> findByName(String name);
+
+    /**
+     * Finds all entities from the storage with the given {@link GiftCertificateDto}
+     * and maps them to {@link TagDto}.
+     *
+     * @param giftCertificateDto {@code the certificates} whose {@code Tags} are needed to be received.
+     * @return list of all {@code TagDtos} that have the given {@link GiftCertificateDto}.
+     */
+    List<TagDto> findByGiftCertificate(GiftCertificateDto giftCertificateDto);
 }
