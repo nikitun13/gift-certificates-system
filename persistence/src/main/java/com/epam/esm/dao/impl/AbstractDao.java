@@ -1,14 +1,12 @@
 package com.epam.esm.dao.impl;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +27,14 @@ public abstract class AbstractDao<E> {
     private static final String WHERE_ID_SQL_FORMAT = " WHERE %s = ?";
 
     protected final JdbcTemplate jdbcTemplate;
+    protected final RowMapper<E> rowMapper;
 
-    protected AbstractDao(JdbcTemplate jdbcTemplate) {
+    protected AbstractDao(JdbcTemplate jdbcTemplate, Class<E> entityClass) {
         this.jdbcTemplate = jdbcTemplate;
+        rowMapper = new DataClassRowMapper<>(entityClass);
     }
 
     protected List<E> executeSelectQuery(String sql, Object... args) {
-        RowMapper<E> rowMapper = getRowMapper();
         return jdbcTemplate.query(sql, rowMapper, args);
     }
 
@@ -43,11 +42,12 @@ public abstract class AbstractDao<E> {
         return executeSelectQuery(sql, args).stream().findFirst();
     }
 
-    protected <T> T executeInsertQueryReturnGeneratedKeys(E entity, Class<T> keyClass) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        PreparedStatementCreator preparedStatementCreator = buildInsertPreparedStatement(entity);
-        jdbcTemplate.update(preparedStatementCreator, keyHolder);
-        return keyHolder.getKeyAs(keyClass);
+    protected <T> T executeInsertQueryReturnGeneratedKey(E entity, Class<T> keyClass) {
+        return new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName(getTableName())
+                .usingGeneratedKeyColumns(getIdColumnName())
+                .executeAndReturnKeyHolder(new BeanPropertySqlParameterSource(entity))
+                .getKeyAs(keyClass);
     }
 
     protected void executeDeleteQuery(Object id) {
@@ -77,18 +77,6 @@ public abstract class AbstractDao<E> {
 
         return jdbcTemplate.update(sql, args);
     }
-
-    protected void setArgumentsToPreparedStatement(PreparedStatement preparedStatement,
-                                                   Object... args) throws SQLException {
-        int i = 0;
-        for (Object arg : args) {
-            preparedStatement.setObject(++i, arg);
-        }
-    }
-
-    protected abstract RowMapper<E> getRowMapper();
-
-    protected abstract PreparedStatementCreator buildInsertPreparedStatement(E entity);
 
     protected abstract Map<String, Object> getMapOfAllColumnNamesVsArgs(E entity);
 
