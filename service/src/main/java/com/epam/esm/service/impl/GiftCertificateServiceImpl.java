@@ -6,6 +6,8 @@ import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mapper.Mapper;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.util.ParamParseUtil;
+import com.epam.esm.util.ReflectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static java.util.Map.Entry;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
@@ -69,8 +74,15 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificateDto> findByParams(Map<String, String> params, List<String> orderBy) {
-        return giftCertificateDao.findByParams(params, orderBy).stream()
+    public List<GiftCertificateDto> findByParams(Map<String, String> params,
+                                                 Map<String, String> tagProperties,
+                                                 List<String> orderBy) {
+        Map<String, String> certificateProperties = params.entrySet().stream()
+                .filter(entry -> ReflectUtil.isContainsField(GiftCertificate.class,
+                        ParamParseUtil.removeOperationCharacterIfPresent(entry.getKey())
+                ))
+                .collect(toMap(Entry::getKey, Entry::getValue));
+        return giftCertificateDao.findByParams(certificateProperties, tagProperties, orderBy).stream()
                 .map(giftCertificateDtoMapper::mapToDto)
                 .toList();
     }

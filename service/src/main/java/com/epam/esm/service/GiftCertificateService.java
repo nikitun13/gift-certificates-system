@@ -56,5 +56,17 @@ public interface GiftCertificateService {
      */
     GiftCertificateDto create(UpdateGiftCertificateDto createGiftCertificateDto);
 
-    List<GiftCertificateDto> findByParams(Map<String, String> params, List<String> orderBy);
+    /**
+     * Finds entities by different params including {@code Tag} params
+     * and orders by the given fields. Unknown params in the
+     * list of parameters will be ignored.
+     *
+     * @param params        filtering properties of the {@code certificate} (unknown properties will be ignored).
+     * @param tagProperties filtering properties of the {@code tag}.
+     * @param orderBy       list of the ordering by fields.
+     * @return list of the dtos that satisfy all the filters.
+     */
+    List<GiftCertificateDto> findByParams(Map<String, String> params,
+                                          Map<String, String> tagProperties,
+                                          List<String> orderBy);
 }
