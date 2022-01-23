@@ -6,6 +6,7 @@ import com.epam.esm.dto.UpdateGiftCertificateDto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Describes interface of the service that provides transactional
@@ -22,6 +23,16 @@ public interface GiftCertificateTagService {
      * @return all {@code GiftCertificates} with {@code Tags}.
      */
     List<GiftCertificateDto> findAll();
+
+    /**
+     * Finds entity by id and maps it to {@link GiftCertificateDto}.
+     * If no such id returns empty {@link Optional}.
+     * Sets {@code Tags} to found entity.
+     *
+     * @param id {@code id} of the entity.
+     * @return Optional {@code GiftCertificateDto}.
+     */
+    Optional<GiftCertificateDto> findById(Long id);
 
     /**
      * Updates {@code GiftCertificate}. Creates many-to-many relationship

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.beans.Introspector;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -45,6 +46,13 @@ public class GiftCertificateTagServiceImpl implements GiftCertificateTagService 
         List<GiftCertificateDto> certificates = giftCertificateService.findAll();
         certificates.forEach(this::setTagsToCertificate);
         return certificates;
+    }
+
+    @Override
+    public Optional<GiftCertificateDto> findById(Long id) {
+        Optional<GiftCertificateDto> maybeCertificate = giftCertificateService.findById(id);
+        maybeCertificate.ifPresent(this::setTagsToCertificate);
+        return maybeCertificate;
     }
 
     @Override
