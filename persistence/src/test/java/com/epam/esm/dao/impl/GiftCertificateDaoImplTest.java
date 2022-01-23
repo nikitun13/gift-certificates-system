@@ -356,7 +356,7 @@ class GiftCertificateDaoImplTest {
     @Tag("findByParams")
     void shouldFindCertificatesByDifferentParamsAndOrderBy() {
         List<GiftCertificate> expected = List.of(oneHundredDollarsCertificate);
-        Map<String, String> certificateParams = Map.of(//2022-01-05 14:29:12.000000
+        Map<String, String> certificateParams = Map.of(
                 "price>", "0",
                 "price<", "10000",
                 "name~", "dollar",
