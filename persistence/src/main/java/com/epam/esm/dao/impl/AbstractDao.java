@@ -24,7 +24,6 @@ public abstract class AbstractDao<E> {
     protected static final String AND_SQL = " AND ";
     protected static final String COMMA_DELIMITER = ", ";
     protected static final String FIELD_EQUALS_SQL_FORMAT = "%s = ?";
-    protected static final String FIELD_ILIKE_SQL_FORMAT = "%s ILIKE ?";
     protected static final String UPDATE_TABLE_SQL_FORMAT = "UPDATE %s SET ";
     protected static final String WHERE_FIELD_EQUALS_SQL_FORMAT = WHERE_SQL + FIELD_EQUALS_SQL_FORMAT;
     protected static final String DELETE_SQL_FORMAT = "DELETE FROM %s" + WHERE_FIELD_EQUALS_SQL_FORMAT;
@@ -90,6 +89,10 @@ public abstract class AbstractDao<E> {
         return field.startsWith("-")
                 ? field.substring(1) + " DESC"
                 : field;
+    }
+
+    protected String wrapWithPercentages(String str) {
+        return "%" + str + "%";
     }
 
     protected abstract Map<String, Object> getMapOfAllColumnNamesVsArgs(E entity);
