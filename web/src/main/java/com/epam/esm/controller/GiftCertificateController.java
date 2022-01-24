@@ -2,6 +2,7 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
+import com.epam.esm.dto.constaints.GeneralConstraintsGroup;
 import com.epam.esm.dto.constaints.CreateGiftCertificateConstraintsGroup;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.GiftCertificateTagService;
@@ -13,7 +14,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +48,9 @@ public class GiftCertificateController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Validated(CreateGiftCertificateConstraintsGroup.class)
-    public ResponseEntity<Void> create(@RequestBody UpdateGiftCertificateDto createDto) {
+    public ResponseEntity<Void> create(
+            @Validated({CreateGiftCertificateConstraintsGroup.class, GeneralConstraintsGroup.class})
+            @RequestBody UpdateGiftCertificateDto createDto) {
         GiftCertificateDto dto = giftCertificateTagService.create(createDto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").build(dto.id());
         return ResponseEntity.created(uri).build();
@@ -62,7 +63,8 @@ public class GiftCertificateController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> update(@RequestBody @Valid UpdateGiftCertificateDto updateDto,
+    public ResponseEntity<Void> update(@Validated(GeneralConstraintsGroup.class)
+                                       @RequestBody UpdateGiftCertificateDto updateDto,
                                        @PathVariable("id") Long id) {
         giftCertificateTagService.update(updateDto, id);
         return ResponseEntity.status(HttpStatus.OK).build();

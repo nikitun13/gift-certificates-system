@@ -1,15 +1,15 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.dto.constaints.CreateGiftCertificateConstraintsGroup;
+import com.epam.esm.dto.constaints.GeneralConstraintsGroup;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 public record CreateTagDto(
-        @NotNull(groups = CreateGiftCertificateConstraintsGroup.class,
-                message = "name can't be null")
-        @Min(value = 2L, message = "name can't be less than 2 symbols")
-        @Max(value = 128L, message = "name can't be more than 128 symbols")
+        @Size(min = 2, max = 128,
+                groups = GeneralConstraintsGroup.class,
+                message = "name should be between 2 and 128 symbols")
+        @NotBlank(groups = GeneralConstraintsGroup.class,
+                message = "name can't be blank")
         String name) {
 }
