@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,12 +27,6 @@ public class GiftCertificateDaoImpl extends AbstractDao<GiftCertificate> impleme
 
     private static final String TABLE_NAME = "gift_certificate";
     private static final String ID_COLUMN_NAME = "id";
-    private static final String NAME_COLUMN_NAME = "name";
-    private static final String DESCRIPTION_COLUMN_NAME = "description";
-    private static final String PRICE_COLUMN_NAME = "price";
-    private static final String DURATION_COLUMN_NAME = "duration";
-    private static final String CREATE_DATE_COLUMN_NAME = "create_date";
-    private static final String LAST_UPDATE_DATE_COLUMN_NAME = "last_update_date";
 
     private static final String GIFT_CERTIFICATE_PREFIX_FORMAT = "gift_certificate.%s";
     private static final String TAG_PREFIX_FORMAT = "tag.%s";
@@ -87,28 +80,6 @@ public class GiftCertificateDaoImpl extends AbstractDao<GiftCertificate> impleme
     @Override
     public void delete(Long id) {
         executeDeleteQuery(id);
-    }
-
-    @Override
-    protected Map<String, Object> getMapOfAllColumnNamesVsArgs(GiftCertificate entity) {
-        var id = entity.getId();
-        var name = entity.getName();
-        var description = entity.getDescription();
-        var price = entity.getPrice();
-        var duration = entity.getDuration();
-        var createDate = entity.getCreateDate();
-        var lastUpdateDate = entity.getLastUpdateDate();
-
-        HashMap<String, Object> map = new HashMap<>();
-        map.put(ID_COLUMN_NAME, id);
-        map.put(NAME_COLUMN_NAME, name);
-        map.put(DESCRIPTION_COLUMN_NAME, description);
-        map.put(PRICE_COLUMN_NAME, price);
-        map.put(DURATION_COLUMN_NAME, duration);
-        map.put(CREATE_DATE_COLUMN_NAME, createDate);
-        map.put(LAST_UPDATE_DATE_COLUMN_NAME, lastUpdateDate);
-
-        return map;
     }
 
     @Override

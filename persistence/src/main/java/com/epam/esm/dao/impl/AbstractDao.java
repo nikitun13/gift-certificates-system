@@ -1,6 +1,6 @@
 package com.epam.esm.dao.impl;
 
-import org.apache.commons.lang3.ObjectUtils;
+import com.epam.esm.util.ReflectUtil;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Map.Entry;
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
@@ -58,22 +57,22 @@ public abstract class AbstractDao<E> {
     }
 
     protected int executeUpdateQuery(E entity) {
-        Map<String, Object> allColumnNamesVsArgs = getMapOfAllColumnNamesVsArgs(entity);
-        Object id = allColumnNamesVsArgs.get(getIdColumnName());
-        Map<String, Object> updatableColumnNamesVsArgs = allColumnNamesVsArgs.entrySet().stream()
-                .filter(not(entry -> entry.getKey().equals(getIdColumnName())))
-                .filter(entry -> ObjectUtils.allNotNull(entry.getValue()))
-                .collect(toMap(Entry::getKey, Entry::getValue));
-
+        Map<String, Optional<Object>> allColumnNamesWithArgs = ReflectUtil.getAllFieldNamesWithValues(entity).entrySet().stream()
+                .collect(toMap(entry -> camelToSnakeCase(entry.getKey()), Entry::getValue));
+        String idColumnName = getIdColumnName();
+        Object id = allColumnNamesWithArgs.remove(idColumnName).orElseThrow(IllegalArgumentException::new);
+        Map<String, Object> updatableColumnNamesWithArgs = allColumnNamesWithArgs.entrySet().stream()
+                .filter(entry -> entry.getValue().isPresent())
+                .collect(toMap(Entry::getKey, entry -> entry.getValue().get()));
         String prefix = UPDATE_TABLE_SQL_FORMAT.formatted(getTableName());
-        String suffix = WHERE_FIELD_EQUALS_SQL_FORMAT.formatted(getIdColumnName());
+        String suffix = WHERE_FIELD_EQUALS_SQL_FORMAT.formatted(idColumnName);
 
-        String sql = updatableColumnNamesVsArgs.keySet()
+        String sql = updatableColumnNamesWithArgs.keySet()
                 .stream()
                 .map(FIELD_EQUALS_SQL_FORMAT::formatted)
                 .collect(joining(COMMA_DELIMITER, prefix, suffix));
 
-        ArrayList<Object> objects = new ArrayList<>(updatableColumnNamesVsArgs.values());
+        ArrayList<Object> objects = new ArrayList<>(updatableColumnNamesWithArgs.values());
         objects.add(id);
         Object[] args = objects.toArray();
 
@@ -94,8 +93,6 @@ public abstract class AbstractDao<E> {
     protected String wrapWithPercentages(String str) {
         return "%" + str + "%";
     }
-
-    protected abstract Map<String, Object> getMapOfAllColumnNamesVsArgs(E entity);
 
     protected abstract String getTableName();
 

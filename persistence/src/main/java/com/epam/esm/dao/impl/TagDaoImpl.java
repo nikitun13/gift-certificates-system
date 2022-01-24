@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -16,7 +14,6 @@ public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
 
     private static final String TABLE_NAME = "tag";
     private static final String ID_COLUMN_NAME = "id";
-    private static final String NAME_COLUMN_NAME = "name";
 
     private static final String FIND_ALL_SQL = "SELECT id, name FROM tag";
     private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + " WHERE id = ?";
@@ -67,18 +64,6 @@ public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
     @Override
     public List<Tag> findByGiftCertificateId(Long id) {
         return executeSelectQuery(FIND_BY_CERTIFICATE_ID_SQL, id);
-    }
-
-    @Override
-    protected Map<String, Object> getMapOfAllColumnNamesVsArgs(Tag entity) {
-        var id = entity.getId();
-        var name = entity.getName();
-
-        HashMap<String, Object> map = new HashMap<>();
-        map.put(ID_COLUMN_NAME, id);
-        map.put(NAME_COLUMN_NAME, name);
-
-        return map;
     }
 
     @Override
