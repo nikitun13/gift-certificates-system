@@ -62,7 +62,7 @@ public class GiftCertificateController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> update(@Validated(GeneralConstraintsGroup.class)
                                        @RequestBody UpdateGiftCertificateDto updateDto,
                                        @PathVariable("id") Long id) {
