@@ -12,7 +12,8 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import javax.sql.DataSource;
 
 @Configuration
-@ComponentScan(lazyInit = true)
+@ComponentScan(lazyInit = true,
+        excludeFilters = @ComponentScan.Filter(Configuration.class))
 public class DaoTestConfig {
 
     @Bean
