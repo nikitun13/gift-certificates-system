@@ -149,6 +149,40 @@ class GiftCertificateDaoImplTest {
 
     @Test
     @Tag("update")
+    void shouldReturnTrueIfWasUpdated() {
+        String newName = "Very awesome cola certificate!";
+        LocalDateTime newLastUpdateDate = LocalDateTime.parse("2022-01-17T10:10:10");
+        cocaColaCertificate.setName(newName);
+        cocaColaCertificate.setLastUpdateDate(newLastUpdateDate);
+        GiftCertificate updatedCertificate = GiftCertificate.builder()
+                .id(cocaColaCertificate.getId())
+                .name(newName)
+                .lastUpdateDate(newLastUpdateDate)
+                .build();
+
+        boolean actual = giftCertificateDao.update(updatedCertificate);
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @Tag("update")
+    void shouldReturnFalseIfNoSuchId() {
+        String newName = "Very awesome cola certificate!";
+        LocalDateTime newLastUpdateDate = LocalDateTime.parse("2022-01-17T10:10:10");
+        GiftCertificate updatedCertificate = GiftCertificate.builder()
+                .id(1000L)
+                .name(newName)
+                .lastUpdateDate(newLastUpdateDate)
+                .build();
+
+        boolean actual = giftCertificateDao.update(updatedCertificate);
+
+        assertThat(actual).isFalse();
+    }
+
+    @Test
+    @Tag("update")
     void shouldUpdateAllFieldsOfCertificateInDatabase() {
         kfcCertificate.setName("KFC updated certificate");
         kfcCertificate.setDescription("Up to date now");
@@ -186,6 +220,16 @@ class GiftCertificateDaoImplTest {
 
     @Test
     @Tag("delete")
+    void shouldReturnTrueIfEntityWasDeletedSuccessfully() {
+        Long existingId = NoTagsCertificate.getId();
+
+        boolean actual = giftCertificateDao.delete(existingId);
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @Tag("delete")
     void shouldDeleteExistingCertificate() {
         List<GiftCertificate> expected = List.of(
                 cocaColaCertificate,
@@ -197,6 +241,16 @@ class GiftCertificateDaoImplTest {
         List<GiftCertificate> actual = giftCertificateDao.findAll();
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    @Tag("delete")
+    void shouldReturnFalseIfNotSuchId() {
+        Long noSuchId = 5000L;
+
+        boolean actual = giftCertificateDao.delete(noSuchId);
+
+        assertThat(actual).isFalse();
     }
 
     @Test

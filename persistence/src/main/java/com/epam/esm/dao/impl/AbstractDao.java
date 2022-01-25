@@ -51,12 +51,12 @@ public abstract class AbstractDao<E> {
                 .getKeyAs(keyClass);
     }
 
-    protected void executeDeleteQuery(Object id) {
+    protected boolean executeDeleteQuery(Object id) {
         String sql = DELETE_SQL_FORMAT.formatted(getTableName(), getIdColumnName());
-        jdbcTemplate.update(sql, id);
+        return jdbcTemplate.update(sql, id) == 1;
     }
 
-    protected int executeUpdateQuery(E entity) {
+    protected boolean executeUpdateQuery(E entity) {
         Map<String, Optional<Object>> allColumnNamesWithArgs = ReflectUtil.getAllFieldNamesWithValues(entity).entrySet().stream()
                 .collect(toMap(entry -> camelToSnakeCase(entry.getKey()), Entry::getValue));
         String idColumnName = getIdColumnName();
@@ -76,7 +76,7 @@ public abstract class AbstractDao<E> {
         objects.add(id);
         Object[] args = objects.toArray();
 
-        return jdbcTemplate.update(sql, args);
+        return jdbcTemplate.update(sql, args) == 1;
     }
 
     protected String camelToSnakeCase(String str) {

@@ -91,6 +91,16 @@ class TagDaoImplTest {
 
     @Test
     @org.junit.jupiter.api.Tag("delete")
+    void shouldReturnTrueIfWasDeleted() {
+        Long existingId = kfcTag.getId();
+
+        boolean actual = tagDao.delete(existingId);
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("delete")
     void shouldDeleteTagById() {
         List<Tag> expected = List.of(cocaColaTag, moneyCertificateTag, unusedTag);
 
@@ -102,10 +112,21 @@ class TagDaoImplTest {
 
     @Test
     @org.junit.jupiter.api.Tag("delete")
+    void shouldReturnFalseIfNoSuchId() {
+        Long noSuchId = 500L;
+
+        boolean actual = tagDao.delete(noSuchId);
+
+        assertThat(actual).isFalse();
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("delete")
     void shouldNotDeleteAnythingIfNoSuchId() {
         List<Tag> expected = List.of(cocaColaTag, kfcTag, moneyCertificateTag, unusedTag);
+        Long noSuchId = 500L;
 
-        tagDao.delete(500L);
+        tagDao.delete(noSuchId);
         List<Tag> actual = tagDao.findAll();
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
@@ -140,5 +161,14 @@ class TagDaoImplTest {
         List<Tag> actual = tagDao.findByGiftCertificateId(2L);
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("update")
+    void shouldThrowUnsupportedOperationException() {
+        kfcTag.setName("new kfc tag");
+
+        assertThatThrownBy(() -> tagDao.update(kfcTag))
+                .isExactlyInstanceOf(UnsupportedOperationException.class);
     }
 }

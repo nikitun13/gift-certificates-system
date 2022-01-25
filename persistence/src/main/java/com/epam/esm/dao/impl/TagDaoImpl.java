@@ -47,13 +47,13 @@ public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
     }
 
     @Override
-    public void update(Tag entity) {
-        throw new UnsupportedOperationException("not implemented");
+    public boolean update(Tag entity) {
+        throw new UnsupportedOperationException("update for Tags is not implemented");
     }
 
     @Override
-    public void delete(Long id) {
-        executeDeleteQuery(id);
+    public boolean delete(Long id) {
+        return executeDeleteQuery(id);
     }
 
     @Override

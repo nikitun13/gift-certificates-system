@@ -39,13 +39,17 @@ public interface BaseDao<K, E> {
      * Updates {@code entity} in the repository.
      *
      * @param entity {@code entity} to be updated in the repository.
+     * @return {@code true} if {@code entity} was updated successfully,
+     * {@code false otherwise}.
      */
-    void update(E entity);
+    boolean update(E entity);
 
     /**
      * Deletes {@code entity} from the repository by its {@code id}.
      *
      * @param id of the {@code entity} to be deleted.
+     * @return {@code true} if {@code entity} was deleted successfully,
+     * {@code false otherwise}.
      */
-    void delete(K id);
+    boolean delete(K id);
 }

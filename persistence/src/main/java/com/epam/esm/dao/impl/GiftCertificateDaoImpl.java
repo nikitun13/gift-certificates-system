@@ -73,13 +73,13 @@ public class GiftCertificateDaoImpl extends AbstractDao<GiftCertificate> impleme
     }
 
     @Override
-    public void update(GiftCertificate entity) {
-        executeUpdateQuery(entity);
+    public boolean update(GiftCertificate entity) {
+        return executeUpdateQuery(entity);
     }
 
     @Override
-    public void delete(Long id) {
-        executeDeleteQuery(id);
+    public boolean delete(Long id) {
+        return executeDeleteQuery(id);
     }
 
     @Override
