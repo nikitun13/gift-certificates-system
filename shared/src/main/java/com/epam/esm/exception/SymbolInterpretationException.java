@@ -1,4 +1,4 @@
-package com.epam.esm.dao.exception;
+package com.epam.esm.exception;
 
 public class SymbolInterpretationException extends RuntimeException {
 

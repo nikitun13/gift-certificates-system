@@ -1,7 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.SqlRequestParamParser;
-import com.epam.esm.dao.exception.SymbolInterpretationException;
+import com.epam.esm.exception.SymbolInterpretationException;
 import com.epam.esm.util.ParamParseUtil;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +41,7 @@ public class SqlRequestParamParserImpl implements SqlRequestParamParser {
         if (symbolVsSqlValue.containsKey(symbol)) {
             return symbolVsSqlValue.get(symbol);
         } else {
-            throw new SymbolInterpretationException("No such symbol: " + symbol);
+            throw new SymbolInterpretationException("Unknown operation symbol. (%s)".formatted(symbol));
         }
     }
 

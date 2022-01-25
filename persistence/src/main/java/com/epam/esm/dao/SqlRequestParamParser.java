@@ -1,6 +1,6 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.dao.exception.SymbolInterpretationException;
+import com.epam.esm.exception.SymbolInterpretationException;
 
 /**
  * Describes interface of a parser that
