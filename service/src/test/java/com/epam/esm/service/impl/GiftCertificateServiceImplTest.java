@@ -255,4 +255,21 @@ class GiftCertificateServiceImplTest {
 
         assertThat(actual).isEqualTo(expected);
     }
+
+    @Test
+    void shouldMapToEntityAndDelegateToDto() {
+        Long id = kfcCertificateDto.id();
+        String newDescription = "New description";
+        UpdateGiftCertificateDto updateKfcCertificate = new UpdateGiftCertificateDto(
+                null, newDescription, null, null, null);
+        Mockito.doReturn(Boolean.TRUE)
+                .when(dao)
+                .update(Mockito.argThat(argument -> argument.getId().equals(id)
+                        && argument.getDescription().equals(newDescription)
+                        && argument.getLastUpdateDate() != null));
+
+        boolean actual = service.update(updateKfcCertificate, id);
+
+        assertThat(actual).isTrue();
+    }
 }
