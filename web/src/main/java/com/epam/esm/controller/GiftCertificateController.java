@@ -34,6 +34,33 @@ public class GiftCertificateController {
         this.giftCertificateTagService = giftCertificateTagService;
     }
 
+    /**
+     * Finds entities with filters. If no filters provided, finds all entities.
+     * Also orders found entities by the given field if ascending or descending orders.<br/>
+     * The fields by which to sort should come under the parameter name {@code 'orderBy'}.
+     * By default, it uses ascending ordering, append {@code '-'} to the beginning of the field name
+     * to use descending ordering.<br/>
+     * Filters should come according to the following convention:
+     * <ul>
+     *     <li>Field name should be as a parameter key</li>
+     *     <li>
+     *         Tags params should start with {@code 'Tag'} prefix
+     *         and {@code Camel case} should be observed (e.g. {@code tagName})
+     *     </li>
+     *     <li>All are combined filters are combined by logical {@code AND}</li>
+     *     <li>Currently supported only {@code String} fields</li>
+     *     <li>
+     *         By default, it find exact match with param value.
+     *         Append {@code '~'} to the end of the parameter name (fieldName) to
+     *         find by part of the given value (matches if contains the given value).
+     *         E.g. /certificates?name~=sky - finds certificates which names contains {@code 'sky'}
+     *     </li>
+     * </ul>
+     *
+     * @param filters for searching through entities.
+     * @param orderBy for ordering found entities.
+     * @return list of GiftCertificateDto mapped to JSON value.
+     */
     @GetMapping
     public ResponseEntity<List<GiftCertificateDto>> findAll(
             @RequestParam(required = false) Map<String, String> filters,
