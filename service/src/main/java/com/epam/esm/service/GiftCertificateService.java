@@ -36,15 +36,19 @@ public interface GiftCertificateService {
      *
      * @param updateGiftCertificateDto dto for update.
      * @param id                       {@code id} of the entity to be updated.
+     * @return {@code true} if {@code entity} was updated successfully,
+     * {@code false otherwise}.
      */
-    void update(UpdateGiftCertificateDto updateGiftCertificateDto, Long id);
+    boolean update(UpdateGiftCertificateDto updateGiftCertificateDto, Long id);
 
     /**
      * Deletes entity by its {@code id}.
      *
      * @param id {@code id} of the entity.
+     * @return {@code true} if {@code entity} was deleted successfully,
+     * {@code false otherwise}.
      */
-    void delete(Long id);
+    boolean delete(Long id);
 
     /**
      * Creates new {@code GiftCertificate} in the storage.

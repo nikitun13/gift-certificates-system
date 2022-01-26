@@ -11,6 +11,7 @@ import com.epam.esm.service.GiftCertificateTagService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.ParamParseUtil;
 import com.epam.esm.util.ReflectUtil;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,11 @@ public class GiftCertificateTagServiceImpl implements GiftCertificateTagService 
 
     @Override
     @Transactional
-    public void update(UpdateGiftCertificateDto updateGiftCertificateDto, Long giftCertificateId) {
-        giftCertificateService.update(updateGiftCertificateDto, giftCertificateId);
+    public boolean update(UpdateGiftCertificateDto updateGiftCertificateDto, Long giftCertificateId) {
+        boolean isUpdated = giftCertificateService.update(updateGiftCertificateDto, giftCertificateId);
+        if (BooleanUtils.isFalse(isUpdated)) {
+            return false;
+        }
         List<CreateTagDto> tags = updateGiftCertificateDto.tags();
         if (ObjectUtils.isNotEmpty(tags)) {
             tags.stream()
@@ -67,6 +71,7 @@ public class GiftCertificateTagServiceImpl implements GiftCertificateTagService 
                     .map(TagDto::id)
                     .forEach(id -> giftCertificateTagDao.create(giftCertificateId, id));
         }
+        return true;
     }
 
     @Override

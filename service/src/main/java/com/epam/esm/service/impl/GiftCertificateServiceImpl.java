@@ -50,17 +50,17 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public void update(UpdateGiftCertificateDto updateGiftCertificateDto, Long id) {
+    public boolean update(UpdateGiftCertificateDto updateGiftCertificateDto, Long id) {
         GiftCertificate entity = updateGiftCertificateDtoMapper.mapToEntity(updateGiftCertificateDto);
         entity.setId(id);
         LocalDateTime now = LocalDateTime.now();
         entity.setLastUpdateDate(now);
-        giftCertificateDao.update(entity);
+        return giftCertificateDao.update(entity);
     }
 
     @Override
-    public void delete(Long id) {
-        giftCertificateDao.delete(id);
+    public boolean delete(Long id) {
+        return giftCertificateDao.delete(id);
     }
 
     @Override

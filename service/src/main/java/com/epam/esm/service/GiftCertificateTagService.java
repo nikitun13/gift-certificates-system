@@ -40,8 +40,10 @@ public interface GiftCertificateTagService {
      *
      * @param updateGiftCertificateDto {@code dto} for updating {@code GiftCertificate}.
      * @param giftCertificateId        {@code id} of the {@code GiftCertificate}.
+     * @return {@code true} if {@code entity} was updated successfully,
+     * {@code false otherwise}.
      */
-    void update(UpdateGiftCertificateDto updateGiftCertificateDto, Long giftCertificateId);
+    boolean update(UpdateGiftCertificateDto updateGiftCertificateDto, Long giftCertificateId);
 
     /**
      * Creates {@code GiftCertificate} entity. Creates many-to-many relationship

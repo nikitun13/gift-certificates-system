@@ -34,8 +34,10 @@ public interface TagService {
      * Deletes entity by its {@code id}.
      *
      * @param id {@code id} of the entity.
+     * @return {@code true} if {@code entity} was deleted successfully,
+     * {@code false otherwise}.
      */
-    void delete(Long id);
+    boolean delete(Long id);
 
     /**
      * Creates new {@code Tag} in the storage.
