@@ -8,6 +8,7 @@ import com.epam.esm.mapper.Mapper;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.util.ParamParseUtil;
 import com.epam.esm.util.ReflectUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,6 +79,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                                                  Map<String, String> tagProperties,
                                                  List<String> orderBy) {
         Map<String, String> certificateProperties = params.entrySet().stream()
+                .filter(entry -> StringUtils.isNotBlank(entry.getKey()))
                 .filter(entry -> ReflectUtil.isContainsField(GiftCertificate.class,
                         ParamParseUtil.removeOperationCharacterIfPresent(entry.getKey())
                 ))

@@ -1,5 +1,7 @@
 package com.epam.esm.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ParamParseUtil {
 
     private ParamParseUtil() {
@@ -12,6 +14,9 @@ public class ParamParseUtil {
      * @return edited string.
      */
     public static String removeOperationCharacterIfPresent(String str) {
+        if (StringUtils.isEmpty(str)) {
+            return str;
+        }
         int lastCharIndex = str.length() - 1;
         int lastCharCodePoint = str.codePointAt(lastCharIndex);
         return Character.isLetter(lastCharCodePoint)

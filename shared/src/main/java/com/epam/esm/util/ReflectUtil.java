@@ -1,6 +1,7 @@
 package com.epam.esm.util;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.ReflectionUtils;
@@ -26,7 +27,12 @@ public class ReflectUtil {
      * @return {@code true} if contains, {@code false} otherwise.
      */
     public static boolean isContainsField(Class<?> clazz, String fieldName) {
-        return ObjectUtils.allNotNull(FieldUtils.getField(clazz, fieldName, true));
+        ObjectUtils.requireNonEmpty(clazz, "Class can't be null");
+        if (StringUtils.isEmpty(fieldName)) {
+            return false;
+        }
+        Field field = FieldUtils.getField(clazz, fieldName, true);
+        return ObjectUtils.allNotNull(field);
     }
 
     /**
@@ -37,6 +43,7 @@ public class ReflectUtil {
      * @return map of the all field names with corresponding values.
      */
     public static Map<String, Optional<Object>> getAllFieldNamesWithValues(Object o) {
+        ObjectUtils.requireNonEmpty(o, "Object can't be null");
         Class<?> clazz = o.getClass();
         return FieldUtils.getAllFieldsList(clazz).stream()
                 .map(Field::getName)
