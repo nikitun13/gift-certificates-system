@@ -2,10 +2,12 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
-import com.epam.esm.dto.constaints.GeneralConstraintsGroup;
 import com.epam.esm.dto.constaints.CreateGiftCertificateConstraintsGroup;
+import com.epam.esm.dto.constaints.GeneralConstraintsGroup;
+import com.epam.esm.exception.EntityNotFoundException;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.GiftCertificateTagService;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,7 +19,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/certificates", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -43,8 +44,9 @@ public class GiftCertificateController {
 
     @GetMapping("/{id}")
     public ResponseEntity<GiftCertificateDto> findById(@PathVariable("id") Long id) {
-        Optional<GiftCertificateDto> maybeDto = giftCertificateTagService.findById(id);
-        return ResponseEntity.of(maybeDto);
+        GiftCertificateDto dto = giftCertificateTagService.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(id));
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -58,7 +60,10 @@ public class GiftCertificateController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
-        giftCertificateService.delete(id);
+        boolean isDeleted = giftCertificateService.delete(id);
+        if (BooleanUtils.isFalse(isDeleted)) {
+            throw new EntityNotFoundException(id);
+        }
         return ResponseEntity.noContent().build();
     }
 
@@ -66,7 +71,10 @@ public class GiftCertificateController {
     public ResponseEntity<Void> update(@Validated(GeneralConstraintsGroup.class)
                                        @RequestBody UpdateGiftCertificateDto updateDto,
                                        @PathVariable("id") Long id) {
-        giftCertificateTagService.update(updateDto, id);
+        boolean isUpdated = giftCertificateTagService.update(updateDto, id);
+        if (BooleanUtils.isFalse(isUpdated)) {
+            throw new EntityNotFoundException(id);
+        }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

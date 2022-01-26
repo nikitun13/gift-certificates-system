@@ -3,7 +3,9 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.CreateTagDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.dto.constaints.GeneralConstraintsGroup;
+import com.epam.esm.exception.EntityNotFoundException;
 import com.epam.esm.service.TagService;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/tags", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -34,8 +35,9 @@ public class TagController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TagDto> findById(@PathVariable("id") Long id) {
-        Optional<TagDto> maybeDto = tagService.findById(id);
-        return ResponseEntity.of(maybeDto);
+        TagDto dto = tagService.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(id));
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -48,7 +50,10 @@ public class TagController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
-        tagService.delete(id);
+        boolean isDeleted = tagService.delete(id);
+        if (BooleanUtils.isFalse(isDeleted)) {
+            throw new EntityNotFoundException(id);
+        }
         return ResponseEntity.noContent().build();
     }
 }
