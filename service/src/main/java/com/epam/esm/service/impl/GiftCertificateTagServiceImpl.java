@@ -78,9 +78,9 @@ public class GiftCertificateTagServiceImpl implements GiftCertificateTagService 
     @Transactional
     public GiftCertificateDto create(UpdateGiftCertificateDto createGiftCertificateDto) {
         GiftCertificateDto createdGiftCertificate = giftCertificateService.create(createGiftCertificateDto);
-        Long giftCertificateId = createdGiftCertificate.id();
         List<CreateTagDto> createTags = createGiftCertificateDto.tags();
         if (ObjectUtils.isNotEmpty(createTags)) {
+            Long giftCertificateId = createdGiftCertificate.id();
             List<TagDto> tags = createTags.stream()
                     .map(tagService::createIfNotExists)
                     .toList();
