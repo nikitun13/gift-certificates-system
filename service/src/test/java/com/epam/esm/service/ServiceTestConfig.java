@@ -26,4 +26,14 @@ public class ServiceTestConfig {
     public GiftCertificateTagDao giftCertificateTagDao() {
         return Mockito.mock(GiftCertificateTagDao.class);
     }
+
+    @Bean
+    public GiftCertificateService giftCertificateService() {
+        return Mockito.mock(GiftCertificateService.class);
+    }
+
+    @Bean
+    public TagService tagService() {
+        return Mockito.mock(TagService.class);
+    }
 }
