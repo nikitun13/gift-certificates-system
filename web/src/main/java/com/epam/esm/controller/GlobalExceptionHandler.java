@@ -125,6 +125,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     @NonNull
+    protected ResponseEntity<Object> handleTypeMismatch(
+            @NonNull TypeMismatchException ex, @NonNull HttpHeaders headers,
+            @NonNull HttpStatus status, @NonNull WebRequest request) {
+        logger.error("TypeMismatchException occurred", ex);
+        int customStatusCode = CustomStatus.TYPE_MISMATCH.getValue();
+        String message = "Type mismatch";
+        ExceptionDto body = new ExceptionDto(customStatusCode, message);
+        return ResponseEntity.status(status)
+                .headers(headers)
+                .body(body);
+    }
+
+    @Override
+    @NonNull
     protected ResponseEntity<Object> handleExceptionInternal(
             @NonNull Exception ex, Object body, @NonNull HttpHeaders headers,
             @NonNull HttpStatus status, @NonNull WebRequest request) {
