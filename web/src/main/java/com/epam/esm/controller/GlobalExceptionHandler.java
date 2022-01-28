@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.BindException;
@@ -77,6 +78,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 (indexOfMessage = exceptionMessage.lastIndexOf("Key")) != -1) {
             message = exceptionMessage.substring(indexOfMessage);
         }
+        return buildResponse(status, customStatusCode, message);
+    }
+
+    @ExceptionHandler(BadSqlGrammarException.class)
+    protected ResponseEntity<Object> handleBadSqlGrammarException(BadSqlGrammarException ex) {
+        logger.error("BadSqlGrammarException occurred", ex);
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        int customStatusCode = CustomStatus.INVALID_INPUT_PARAMS.getValue();
+        String message = "Some input params are invalid";
         return buildResponse(status, customStatusCode, message);
     }
 
