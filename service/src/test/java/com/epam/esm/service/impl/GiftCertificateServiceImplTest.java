@@ -4,30 +4,29 @@ import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Page;
 import com.epam.esm.mapper.Mapper;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.service.ServiceTestConfig;
+import com.epam.esm.service.config.ServiceTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ContextConfiguration(classes = ServiceTestConfig.class)
-@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = ServiceTestConfig.class)
 class GiftCertificateServiceImplTest {
 
     private final GiftCertificateDao dao;
     private final GiftCertificateService service;
-
 
     private GiftCertificate cocaColaCertificate;
     private GiftCertificate kfcCertificate;
@@ -117,13 +116,13 @@ class GiftCertificateServiceImplTest {
         List<GiftCertificate> daoReturn = List.of(cocaColaCertificate, kfcCertificate, oneHundredDollarsCertificate);
         Mockito.doReturn(daoReturn)
                 .when(dao)
-                .findAll();
+                .findAll(new Page(1));
         List<GiftCertificateDto> expected = List.of(
                 cocaColaCertificateDto,
                 kfcCertificateDto,
                 oneHundredDollarsCertificateDto);
 
-        List<GiftCertificateDto> actual = service.findAll();
+        List<GiftCertificateDto> actual = service.findAll(new Page(1));
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -204,56 +203,6 @@ class GiftCertificateServiceImplTest {
         boolean actual = service.delete(id);
 
         assertThat(actual).isFalse();
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFilterUnknownCertificateParams() {
-        Map<String, String> dummyTagProperties = Collections.emptyMap();
-        List<String> dummyOrderBy = Collections.emptyList();
-        String dummyValue = "dummy";
-        Map<String, String> params = Map.of(
-                "names", dummyValue,
-                "ide~", dummyValue,
-                "descriptionl~", dummyValue,
-                "money>", dummyValue,
-                "432t3", dummyValue,
-                "<><><>", dummyValue,
-                "~", dummyValue,
-                "", dummyValue,
-                "a", dummyValue,
-                "createDate", dummyValue
-        );
-        Map<String, String> expectedDaoParams = Map.of("createDate", dummyValue);
-        Mockito.doReturn(List.of(oneHundredDollarsCertificate))
-                .when(dao)
-                .findByParams(expectedDaoParams, dummyTagProperties, dummyOrderBy);
-        List<GiftCertificateDto> expected = List.of(oneHundredDollarsCertificateDto);
-
-        List<GiftCertificateDto> actual = service.findByParams(params, dummyTagProperties, dummyOrderBy);
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindAllIfNoFiltersPresent() {
-        Map<String, String> emptyParams = Collections.emptyMap();
-        Map<String, String> emptyTagProperties = Collections.emptyMap();
-        List<String> emptyOrderBy = Collections.emptyList();
-
-        List<GiftCertificate> daoReturn = List.of(cocaColaCertificate, kfcCertificate, oneHundredDollarsCertificate);
-        Mockito.doReturn(daoReturn)
-                .when(dao)
-                .findByParams(emptyParams, emptyTagProperties, emptyOrderBy);
-        List<GiftCertificateDto> expected = List.of(
-                cocaColaCertificateDto,
-                kfcCertificateDto,
-                oneHundredDollarsCertificateDto);
-
-        List<GiftCertificateDto> actual = service.findByParams(emptyParams, emptyTagProperties, emptyOrderBy);
-
-        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

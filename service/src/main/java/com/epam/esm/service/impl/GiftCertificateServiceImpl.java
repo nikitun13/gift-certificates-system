@@ -4,23 +4,19 @@ import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Page;
 import com.epam.esm.mapper.Mapper;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.util.ParamParseUtil;
-import com.epam.esm.util.ReflectUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Map.Entry;
-import static java.util.stream.Collectors.toMap;
-
 @Service
+@Transactional
 public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private final GiftCertificateDao giftCertificateDao;
@@ -37,9 +33,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificateDto> findAll() {
-        return giftCertificateDao.findAll()
-                .stream()
+    public List<GiftCertificateDto> findAll(Page page) {
+        return giftCertificateDao.findAll(page).stream()
                 .map(giftCertificateDtoMapper::mapToDto)
                 .toList();
     }
@@ -72,20 +67,5 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         entity.setLastUpdateDate(now);
         giftCertificateDao.create(entity);
         return giftCertificateDtoMapper.mapToDto(entity);
-    }
-
-    @Override
-    public List<GiftCertificateDto> findByParams(Map<String, String> params,
-                                                 Map<String, String> tagProperties,
-                                                 List<String> orderBy) {
-        Map<String, String> certificateProperties = params.entrySet().stream()
-                .filter(entry -> StringUtils.isNotBlank(entry.getKey()))
-                .filter(entry -> ReflectUtil.isContainsField(GiftCertificate.class,
-                        ParamParseUtil.removeOperationCharacterIfPresent(entry.getKey())
-                ))
-                .collect(toMap(Entry::getKey, Entry::getValue));
-        return giftCertificateDao.findByParams(certificateProperties, tagProperties, orderBy).stream()
-                .map(giftCertificateDtoMapper::mapToDto)
-                .toList();
     }
 }
