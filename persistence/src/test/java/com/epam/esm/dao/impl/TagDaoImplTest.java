@@ -2,7 +2,7 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.config.DaoTestConfig;
-import com.epam.esm.entity.Page;
+import com.epam.esm.dto.Page;
 import com.epam.esm.entity.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,7 +3,7 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.config.DaoTestConfig;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Page;
+import com.epam.esm.dto.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

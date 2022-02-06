@@ -2,7 +2,7 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.BaseDao;
 import com.epam.esm.entity.BaseEntity;
-import com.epam.esm.entity.Page;
+import com.epam.esm.dto.Page;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;

@@ -1,7 +1,7 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.BaseEntity;
-import com.epam.esm.entity.Page;
+import com.epam.esm.dto.Page;
 
 import java.io.Serializable;
 import java.util.List;

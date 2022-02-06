@@ -2,7 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.CreateTagDto;
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.entity.Page;
+import com.epam.esm.dto.Page;
 
 import java.util.List;
 import java.util.Optional;

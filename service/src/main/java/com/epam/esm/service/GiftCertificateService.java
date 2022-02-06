@@ -2,7 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
-import com.epam.esm.entity.Page;
+import com.epam.esm.dto.Page;
 
 import java.util.List;
 import java.util.Optional;

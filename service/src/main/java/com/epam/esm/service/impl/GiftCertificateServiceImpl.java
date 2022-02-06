@@ -4,7 +4,7 @@ import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Page;
+import com.epam.esm.dto.Page;
 import com.epam.esm.mapper.Mapper;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.beans.factory.annotation.Autowired;

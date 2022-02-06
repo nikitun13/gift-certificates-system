@@ -3,7 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.CreateTagDto;
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.entity.Page;
+import com.epam.esm.dto.Page;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.Mapper;
 import com.epam.esm.service.TagService;
