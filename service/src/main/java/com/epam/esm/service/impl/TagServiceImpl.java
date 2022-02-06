@@ -2,18 +2,20 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.CreateTagDto;
-import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.mapper.Mapper;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class TagServiceImpl implements TagService {
 
     private final TagDao tagDao;
@@ -30,8 +32,8 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> findAll() {
-        return tagDao.findAll()
+    public List<TagDto> findAll(Page page) {
+        return tagDao.findAll(page)
                 .stream()
                 .map(tagDtoMapper::mapToDto)
                 .toList();
@@ -56,22 +58,8 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagDto createIfNotExists(CreateTagDto createTagDto) {
-        Optional<TagDto> maybeTag = findByName(createTagDto.name());
-        return maybeTag.orElseGet(() -> create(createTagDto));
-    }
-
-    @Override
     public Optional<TagDto> findByName(String name) {
         return tagDao.findByName(name)
                 .map(tagDtoMapper::mapToDto);
-    }
-
-    @Override
-    public List<TagDto> findByGiftCertificate(GiftCertificateDto giftCertificateDto) {
-        return tagDao.findByGiftCertificateId(giftCertificateDto.id())
-                .stream()
-                .map(tagDtoMapper::mapToDto)
-                .toList();
     }
 }
