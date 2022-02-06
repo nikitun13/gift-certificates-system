@@ -29,6 +29,8 @@ subprojects {
         mavenCentral()
     }
 
+    bootJar.enabled = false
+
     dependencies {
         implementation 'org.apache.commons:commons-lang3'
         implementation 'org.springframework.boot:spring-boot-starter-validation'
