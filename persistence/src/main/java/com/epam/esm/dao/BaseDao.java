@@ -1,5 +1,9 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.entity.BaseEntity;
+import com.epam.esm.entity.Page;
+
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,14 +14,15 @@ import java.util.Optional;
  * @param <K> id (key) of the entity.
  * @param <E> entity itself.
  */
-public interface BaseDao<K, E> {
+public interface BaseDao<K extends Serializable, E extends BaseEntity<K>> {
 
     /**
      * Returns all {@code entities} from the repository.
      *
+     * @param page current page.
      * @return list of the all {@code entities} from the repository.
      */
-    List<E> findAll();
+    List<E> findAll(Page page);
 
     /**
      * Finds {@code entity} by its {@code id}.
@@ -33,7 +38,7 @@ public interface BaseDao<K, E> {
      *
      * @param entity {@code entity} to be added to the repository.
      */
-    void create(E entity);
+    E create(E entity);
 
     /**
      * Updates {@code entity} in the repository.
