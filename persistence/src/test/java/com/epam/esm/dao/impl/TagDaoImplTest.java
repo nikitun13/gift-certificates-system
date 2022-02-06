@@ -1,14 +1,13 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.dao.DaoTestConfig;
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dao.config.DaoTestConfig;
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,8 +16,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@ContextConfiguration(classes = DaoTestConfig.class)
-@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = DaoTestConfig.class)
 @Transactional
 class TagDaoImplTest {
 
@@ -35,7 +33,7 @@ class TagDaoImplTest {
     void shouldFindAllTagsFromDB() {
         List<Tag> expected = List.of(cocaColaTag, kfcTag, moneyCertificateTag, unusedTag);
 
-        List<Tag> actual = tagDao.findAll();
+        List<Tag> actual = tagDao.findAll(new Page(1));
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
@@ -82,21 +80,11 @@ class TagDaoImplTest {
 
     @Test
     @org.junit.jupiter.api.Tag("create")
-    void shouldThrowDuplicateKeyExceptionIfSuchNameAlreadyExists() {
+    void shouldThrowDataIntegrityViolationExceptionIfSuchNameAlreadyExists() {
         Tag newTag = Tag.builder().name("kfc").build();
 
         assertThatThrownBy(() -> tagDao.create(newTag))
-                .isExactlyInstanceOf(DuplicateKeyException.class);
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("delete")
-    void shouldReturnTrueIfWasDeleted() {
-        Long existingId = kfcTag.getId();
-
-        boolean actual = tagDao.delete(existingId);
-
-        assertThat(actual).isTrue();
+                .isExactlyInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -105,19 +93,9 @@ class TagDaoImplTest {
         List<Tag> expected = List.of(cocaColaTag, moneyCertificateTag, unusedTag);
 
         tagDao.delete(kfcTag.getId());
-        List<Tag> actual = tagDao.findAll();
+        List<Tag> actual = tagDao.findAll(new Page(1));
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("delete")
-    void shouldReturnFalseIfNoSuchId() {
-        Long noSuchId = 500L;
-
-        boolean actual = tagDao.delete(noSuchId);
-
-        assertThat(actual).isFalse();
     }
 
     @Test
@@ -127,7 +105,7 @@ class TagDaoImplTest {
         Long noSuchId = 500L;
 
         tagDao.delete(noSuchId);
-        List<Tag> actual = tagDao.findAll();
+        List<Tag> actual = tagDao.findAll(new Page(1));
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
@@ -151,24 +129,5 @@ class TagDaoImplTest {
         Optional<Tag> actual = tagDao.findByName(noSuchName);
 
         assertThat(actual).isEmpty();
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("findByGiftCertificateId")
-    void findByGiftCertificateId() {
-        List<Tag> expected = List.of(kfcTag, moneyCertificateTag);
-
-        List<Tag> actual = tagDao.findByGiftCertificateId(2L);
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("update")
-    void shouldThrowUnsupportedOperationException() {
-        kfcTag.setName("new kfc tag");
-
-        assertThatThrownBy(() -> tagDao.update(kfcTag))
-                .isExactlyInstanceOf(UnsupportedOperationException.class);
     }
 }

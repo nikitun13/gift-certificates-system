@@ -1,29 +1,23 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.dao.DaoTestConfig;
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.config.DaoTestConfig;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@ContextConfiguration(classes = DaoTestConfig.class)
-@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = DaoTestConfig.class)
 @Transactional
 class GiftCertificateDaoImplTest {
 
@@ -88,7 +82,7 @@ class GiftCertificateDaoImplTest {
                 NoTagsCertificate
         );
 
-        List<GiftCertificate> actual = giftCertificateDao.findAll();
+        List<GiftCertificate> actual = giftCertificateDao.findAll(new Page(1));
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
@@ -149,40 +143,6 @@ class GiftCertificateDaoImplTest {
 
     @Test
     @Tag("update")
-    void shouldReturnTrueIfWasUpdated() {
-        String newName = "Very awesome cola certificate!";
-        LocalDateTime newLastUpdateDate = LocalDateTime.parse("2022-01-17T10:10:10");
-        cocaColaCertificate.setName(newName);
-        cocaColaCertificate.setLastUpdateDate(newLastUpdateDate);
-        GiftCertificate updatedCertificate = GiftCertificate.builder()
-                .id(cocaColaCertificate.getId())
-                .name(newName)
-                .lastUpdateDate(newLastUpdateDate)
-                .build();
-
-        boolean actual = giftCertificateDao.update(updatedCertificate);
-
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    @Tag("update")
-    void shouldReturnFalseIfNoSuchId() {
-        String newName = "Very awesome cola certificate!";
-        LocalDateTime newLastUpdateDate = LocalDateTime.parse("2022-01-17T10:10:10");
-        GiftCertificate updatedCertificate = GiftCertificate.builder()
-                .id(1000L)
-                .name(newName)
-                .lastUpdateDate(newLastUpdateDate)
-                .build();
-
-        boolean actual = giftCertificateDao.update(updatedCertificate);
-
-        assertThat(actual).isFalse();
-    }
-
-    @Test
-    @Tag("update")
     void shouldUpdateAllFieldsOfCertificateInDatabase() {
         kfcCertificate.setName("KFC updated certificate");
         kfcCertificate.setDescription("Up to date now");
@@ -220,16 +180,6 @@ class GiftCertificateDaoImplTest {
 
     @Test
     @Tag("delete")
-    void shouldReturnTrueIfEntityWasDeletedSuccessfully() {
-        Long existingId = NoTagsCertificate.getId();
-
-        boolean actual = giftCertificateDao.delete(existingId);
-
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    @Tag("delete")
     void shouldDeleteExistingCertificate() {
         List<GiftCertificate> expected = List.of(
                 cocaColaCertificate,
@@ -238,19 +188,9 @@ class GiftCertificateDaoImplTest {
         );
 
         giftCertificateDao.delete(NoTagsCertificate.getId());
-        List<GiftCertificate> actual = giftCertificateDao.findAll();
+        List<GiftCertificate> actual = giftCertificateDao.findAll(new Page(1));
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @Tag("delete")
-    void shouldReturnFalseIfNotSuchId() {
-        Long noSuchId = 5000L;
-
-        boolean actual = giftCertificateDao.delete(noSuchId);
-
-        assertThat(actual).isFalse();
     }
 
     @Test
@@ -264,189 +204,7 @@ class GiftCertificateDaoImplTest {
         );
 
         giftCertificateDao.delete(5000L);
-        List<GiftCertificate> actual = giftCertificateDao.findAll();
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindAllIfEmptyParamsAndOrderByAreGiven() {
-        List<GiftCertificate> expected = List.of(
-                cocaColaCertificate,
-                kfcCertificate,
-                oneHundredDollarsCertificate,
-                NoTagsCertificate
-        );
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                Collections.emptyMap(),
-                Collections.emptyMap(),
-                Collections.emptyList());
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindAllAndOrderByNameDescIfEmptyParamsAndOrderByNameDescAreGiven() {
-        List<GiftCertificate> expected = List.of(
-                kfcCertificate,
-                cocaColaCertificate,
-                NoTagsCertificate,
-                oneHundredDollarsCertificate
-        );
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                Collections.emptyMap(),
-                Collections.emptyMap(),
-                List.of("-name"));
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindAllAndOrderByGivenArgsIfEmptyParamsAreGiven() {
-        List<GiftCertificate> expected = List.of(
-                kfcCertificate,
-                cocaColaCertificate,
-                NoTagsCertificate,
-                oneHundredDollarsCertificate
-        );
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                Collections.emptyMap(),
-                Collections.emptyMap(),
-                List.of("-name", "createDate", "-lastUpdateDate"));
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldThrowBadSqlGrammarExceptionIfInvalidOrderingFieldReceived() {
-        List<String> orderBy = List.of("-name", "createDate", "-time");
-        Map<String, String> emptyParams = Collections.emptyMap();
-        assertThatThrownBy(() -> giftCertificateDao.findByParams(
-                emptyParams, emptyParams, orderBy))
-                .isExactlyInstanceOf(BadSqlGrammarException.class);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFilterByOneFieldWithoutOrdering() {
-        List<GiftCertificate> expected = List.of(
-                cocaColaCertificate,
-                oneHundredDollarsCertificate
-        );
-        Map<String, String> certificateParams = Map.of("name~", "la");
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                certificateParams, Collections.emptyMap(), Collections.emptyList()
-        );
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindByParamsAndTagAndOrderByDateDescThanName() {
-        List<GiftCertificate> expected = List.of(
-                oneHundredDollarsCertificate,
-                kfcCertificate
-        );
-        Map<String, String> certificateParams = Map.of(
-                "name~", "ti",
-                "description~", "10"
-        );
-        Map<String, String> tagParams = Map.of("name", "money certificate");
-        List<String> orderBy = List.of("-createDate", "name");
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                certificateParams, tagParams, orderBy
-        );
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindCertificatesOnlyByTag() {
-        List<GiftCertificate> expected = List.of(
-                oneHundredDollarsCertificate,
-                kfcCertificate
-        );
-        Map<String, String> tagParams = Map.of("name", "money certificate");
-        List<String> emptyOrderBy = Collections.emptyList();
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                Collections.emptyMap(), tagParams, emptyOrderBy
-        );
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindCertificatesByPriceBetween() {
-        List<GiftCertificate> expected = List.of(
-                cocaColaCertificate,
-                kfcCertificate
-        );
-        Map<String, String> certificateParams = Map.of(
-                "price>", "500",
-                "price<", "5000"
-        );
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                certificateParams, Collections.emptyMap(), Collections.emptyList()
-        );
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindCertificatesByDifferentParamsAndOrderBy() {
-        List<GiftCertificate> expected = List.of(oneHundredDollarsCertificate);
-        Map<String, String> certificateParams = Map.of(
-                "price>", "0",
-                "price<", "10000",
-                "name~", "dollar",
-                "description~", "10",
-                "createDate>", "2022-01-05",
-                "duration", "20"
-        );
-        Map<String, String> tagsParams = Map.of(
-                "name~", "ce",
-                "id>", "2"
-        );
-        List<String> orderBy = List.of("-createDate", "name", "-duration", "lastUpdateDate");
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                certificateParams, tagsParams, orderBy
-        );
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindByCreateDateBetween() {
-        List<GiftCertificate> expected = List.of(
-                kfcCertificate,
-                oneHundredDollarsCertificate,
-                NoTagsCertificate
-        );
-        Map<String, String> certificateParams = Map.of(
-                "createDate>", "2022-01-02",
-                "createDate<", "2022-01-11"
-        );
-
-        List<GiftCertificate> actual = giftCertificateDao.findByParams(
-                certificateParams, Collections.emptyMap(), Collections.emptyList()
-        );
+        List<GiftCertificate> actual = giftCertificateDao.findAll(new Page(1));
 
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
