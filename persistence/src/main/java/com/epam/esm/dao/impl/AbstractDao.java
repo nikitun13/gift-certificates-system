@@ -1,100 +1,75 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.util.ReflectUtil;
-import org.springframework.jdbc.core.DataClassRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import com.epam.esm.dao.BaseDao;
+import com.epam.esm.entity.BaseEntity;
+import com.epam.esm.entity.Page;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaQuery;
+import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Map.Entry;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
+@Transactional
+public abstract class AbstractDao<K extends Serializable, E extends BaseEntity<K>> implements BaseDao<K, E> {
 
-public abstract class AbstractDao<E> {
+    private final Class<E> entityClass;
+    protected final EntityManager entityManager;
 
-    protected static final String WHERE_SQL = " WHERE ";
-    protected static final String ORDER_BY_SQL = " ORDER BY ";
-    protected static final String AND_SQL = " AND ";
-    protected static final String COMMA_DELIMITER = ", ";
-    protected static final String FIELD_EQUALS_SQL_FORMAT = "%s = ?";
-    protected static final String UPDATE_TABLE_SQL_FORMAT = "UPDATE %s SET ";
-    protected static final String WHERE_FIELD_EQUALS_SQL_FORMAT = WHERE_SQL + FIELD_EQUALS_SQL_FORMAT;
-    protected static final String DELETE_SQL_FORMAT = "DELETE FROM %s" + WHERE_FIELD_EQUALS_SQL_FORMAT;
-
-    protected final JdbcTemplate jdbcTemplate;
-    protected final RowMapper<E> rowMapper;
-
-    protected AbstractDao(JdbcTemplate jdbcTemplate, Class<E> entityClass) {
-        this.jdbcTemplate = jdbcTemplate;
-        rowMapper = new DataClassRowMapper<>(entityClass);
+    protected AbstractDao(Class<E> entityClass, EntityManager entityManager) {
+        this.entityClass = entityClass;
+        this.entityManager = entityManager;
     }
 
-    protected List<E> executeSelectQuery(String sql, Object... args) {
-        return jdbcTemplate.query(sql, rowMapper, args);
+    @Override
+    public List<E> findAll(Page page) {
+        CriteriaQuery<E> criteria = entityManager.getCriteriaBuilder().createQuery(entityClass);
+        int offset = page.getOffset();
+        int pageSize = page.pageSize();
+        criteria.from(entityClass);
+        return entityManager.createQuery(criteria)
+                .setFirstResult(offset)
+                .setMaxResults(pageSize)
+                .getResultList();
     }
 
-    protected Optional<E> executeIdentifiableSelectQuery(String sql, Object... args) {
-        return executeSelectQuery(sql, args).stream().findFirst();
+    @Override
+    public Optional<E> findById(K id) {
+        return Optional.ofNullable(entityManager.find(entityClass, id));
     }
 
-    protected <T> T executeInsertQueryReturnGeneratedKey(E entity, Class<T> keyClass) {
-        return new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName(getTableName())
-                .usingGeneratedKeyColumns(getIdColumnName())
-                .executeAndReturnKeyHolder(new BeanPropertySqlParameterSource(entity))
-                .getKeyAs(keyClass);
+    @Override
+    public E create(E entity) {
+        entityManager.persist(entity);
+        return entity;
     }
 
-    protected boolean executeDeleteQuery(Object id) {
-        String sql = DELETE_SQL_FORMAT.formatted(getTableName(), getIdColumnName());
-        return jdbcTemplate.update(sql, id) == 1;
+    @Override
+    public boolean update(E entity) {
+        Optional<E> maybeEntity = findById(entity.getId());
+        maybeEntity.ifPresent(persistedEntity -> update(persistedEntity, entity));
+        return maybeEntity.isPresent();
     }
 
-    protected boolean executeUpdateQuery(E entity) {
-        Map<String, Optional<Object>> allColumnNamesWithArgs = ReflectUtil.getAllFieldNamesWithValues(entity).entrySet().stream()
-                .collect(toMap(entry -> camelToSnakeCase(entry.getKey()), Entry::getValue));
-        String idColumnName = getIdColumnName();
-        Object id = allColumnNamesWithArgs.remove(idColumnName).orElseThrow(IllegalArgumentException::new);
-        Map<String, Object> updatableColumnNamesWithArgs = allColumnNamesWithArgs.entrySet().stream()
-                .filter(entry -> entry.getValue().isPresent())
-                .collect(toMap(Entry::getKey, entry -> entry.getValue().get()));
-        String prefix = UPDATE_TABLE_SQL_FORMAT.formatted(getTableName());
-        String suffix = WHERE_FIELD_EQUALS_SQL_FORMAT.formatted(idColumnName);
-
-        String sql = updatableColumnNamesWithArgs.keySet()
-                .stream()
-                .map(FIELD_EQUALS_SQL_FORMAT::formatted)
-                .collect(joining(COMMA_DELIMITER, prefix, suffix));
-
-        ArrayList<Object> objects = new ArrayList<>(updatableColumnNamesWithArgs.values());
-        objects.add(id);
-        Object[] args = objects.toArray();
-
-        return jdbcTemplate.update(sql, args) == 1;
+    @Override
+    public boolean delete(K id) {
+        Optional<E> maybeEntity = findById(id);
+        maybeEntity.ifPresent(entityManager::remove);
+        return maybeEntity.isPresent();
     }
 
-    protected String camelToSnakeCase(String str) {
-        return str.replaceAll("([a-z])([A-Z])", "$1_$2")
-                .toLowerCase();
+    /**
+     * Merges new entity to persisted one.
+     * Updates not null fields from the new entity.
+     *
+     * @param persistedEntity persisted entity to be updated.
+     * @param newEntity       new entity with optional fields for updating.
+     */
+    protected abstract void mergeEntities(E persistedEntity, E newEntity);
+
+    private void update(E persistedEntity, E newEntity) {
+        mergeEntities(persistedEntity, newEntity);
+        entityManager.merge(persistedEntity);
     }
-
-    protected String createOrderingSqlString(String field) {
-        return field.startsWith("-")
-                ? field.substring(1) + " DESC"
-                : field;
-    }
-
-    protected String wrapWithPercentages(String str) {
-        return "%" + str + "%";
-    }
-
-    protected abstract String getTableName();
-
-    protected abstract String getIdColumnName();
 }
