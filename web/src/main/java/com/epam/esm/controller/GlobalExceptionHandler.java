@@ -2,14 +2,13 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.ExceptionDto;
 import com.epam.esm.exception.EntityNotFoundException;
-import com.epam.esm.exception.SymbolInterpretationException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,22 +52,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         logger.error("EntityNotFoundException occurred", ex);
         String message = ex.getMessage();
         int customStatusCode = CustomStatus.ENTITY_NOT_FOUND.getValue();
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+        HttpStatus status = HttpStatus.NOT_FOUND;
         return buildResponse(status, customStatusCode, message);
     }
 
-    @ExceptionHandler(SymbolInterpretationException.class)
-    protected ResponseEntity<Object> handleSymbolInterpretationException(SymbolInterpretationException ex) {
-        logger.error("SymbolInterpretationException occurred", ex);
-        String message = ex.getMessage();
-        int customStatusCode = CustomStatus.PARSING_REQUEST_EXCEPTION.getValue();
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        return buildResponse(status, customStatusCode, message);
-    }
-
-    @ExceptionHandler(DuplicateKeyException.class)
-    protected ResponseEntity<Object> handleDuplicateKeyException(DuplicateKeyException ex) {
-        logger.error("DuplicateKeyException occurred", ex);
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    protected ResponseEntity<Object> handleDuplicateKeyException(DataIntegrityViolationException ex) {
+        logger.error("DataIntegrityViolationException occurred", ex);
         HttpStatus status = HttpStatus.CONFLICT;
         int customStatusCode = CustomStatus.DUPLICATE_KEY_EXCEPTION.getValue();
         String message = "Key already exists";
