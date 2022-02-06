@@ -2,9 +2,9 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
+import com.epam.esm.entity.Page;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -17,9 +17,10 @@ public interface GiftCertificateService {
      * Finds all entities from the storage and maps them
      * to {@link GiftCertificateDto}.
      *
+     * @param page current page.
      * @return list of all {@code GiftCertificateDtos}.
      */
-    List<GiftCertificateDto> findAll();
+    List<GiftCertificateDto> findAll(Page page);
 
     /**
      * Finds entity by id and maps it to {@link GiftCertificateDto}.
@@ -59,18 +60,4 @@ public interface GiftCertificateService {
      * @return created entity that mapped to {@link GiftCertificateDto}.
      */
     GiftCertificateDto create(UpdateGiftCertificateDto createGiftCertificateDto);
-
-    /**
-     * Finds entities by different params including {@code Tag} params
-     * and orders by the given fields. Unknown params in the
-     * list of parameters will be ignored.
-     *
-     * @param params        filtering properties of the {@code certificate} (unknown properties will be ignored).
-     * @param tagProperties filtering properties of the {@code tag}.
-     * @param orderBy       list of the ordering by fields.
-     * @return list of the dtos that satisfy all the filters.
-     */
-    List<GiftCertificateDto> findByParams(Map<String, String> params,
-                                          Map<String, String> tagProperties,
-                                          List<String> orderBy);
 }
