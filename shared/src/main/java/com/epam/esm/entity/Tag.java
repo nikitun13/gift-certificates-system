@@ -1,11 +1,27 @@
 package com.epam.esm.entity;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class Tag {
+@Entity
+public class Tag implements BaseEntity<Long> {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @ManyToMany(mappedBy = "tags")
+    private List<GiftCertificate> giftCertificates = new ArrayList<>();
 
     public Tag(Long id, String name) {
         this.id = id;
@@ -19,16 +35,26 @@ public class Tag {
         return new TagBuilder();
     }
 
+    public List<GiftCertificate> getGiftCertificates() {
+        return giftCertificates;
+    }
+
+    public void setGiftCertificates(List<GiftCertificate> giftCertificates) {
+        this.giftCertificates = giftCertificates;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
     public Long getId() {
-        return this.id;
+        return id;
     }
 
     public String getName() {
         return this.name;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public void setName(String name) {
