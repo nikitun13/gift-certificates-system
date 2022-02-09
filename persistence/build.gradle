@@ -2,7 +2,6 @@ dependencies {
     implementation project(':shared')
     implementation 'org.hibernate:hibernate-core'
     runtimeOnly 'org.postgresql:postgresql'
-    implementation 'org.apache.commons:commons-dbcp2'//to be removed
 
     testRuntimeOnly 'com.h2database:h2'
 }
