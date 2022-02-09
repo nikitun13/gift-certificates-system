@@ -1,16 +1,21 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.CreateTagDto;
+import com.epam.esm.dto.Page;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.dto.constaints.GeneralConstraintsGroup;
 import com.epam.esm.exception.EntityNotFoundException;
 import com.epam.esm.service.TagService;
-import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -22,14 +27,13 @@ public class TagController {
 
     private final TagService tagService;
 
-    @Autowired
     public TagController(TagService tagService) {
         this.tagService = tagService;
     }
 
     @GetMapping
     public ResponseEntity<List<TagDto>> findAll() {
-        List<TagDto> result = tagService.findAll();
+        List<TagDto> result = tagService.findAll(new Page(1));
         return ResponseEntity.ok(result);
     }
 
@@ -51,9 +55,9 @@ public class TagController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         boolean isDeleted = tagService.delete(id);
-        if (BooleanUtils.isFalse(isDeleted)) {
-            throw new EntityNotFoundException(id);
+        if (isDeleted) {
+            return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.noContent().build();
+        throw new EntityNotFoundException(id);
     }
 }
