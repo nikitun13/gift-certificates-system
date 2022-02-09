@@ -2,12 +2,12 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.GiftCertificateFilters;
+import com.epam.esm.dto.Page;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.dto.Page;
 import com.epam.esm.mapper.Mapper;
 import com.epam.esm.service.GiftCertificateService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final Mapper<GiftCertificate, GiftCertificateDto> giftCertificateDtoMapper;
     private final Mapper<GiftCertificate, UpdateGiftCertificateDto> updateGiftCertificateDtoMapper;
 
-    @Autowired
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao,
                                       Mapper<GiftCertificate, GiftCertificateDto> giftCertificateDtoMapper,
                                       Mapper<GiftCertificate, UpdateGiftCertificateDto> updateGiftCertificateDtoMapper) {
@@ -33,8 +32,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificateDto> findAll(Page page) {
-        return giftCertificateDao.findAll(page).stream()
+    public List<GiftCertificateDto> findAll(GiftCertificateFilters filters, Page page) {
+        return giftCertificateDao.findAll(filters, page).stream()
                 .map(giftCertificateDtoMapper::mapToDto)
                 .toList();
     }

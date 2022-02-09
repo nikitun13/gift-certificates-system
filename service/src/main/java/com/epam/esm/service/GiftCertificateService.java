@@ -1,6 +1,7 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.GiftCertificateFilters;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.dto.Page;
 
@@ -14,13 +15,14 @@ import java.util.Optional;
 public interface GiftCertificateService {
 
     /**
-     * Finds all entities from the storage and maps them
-     * to {@link GiftCertificateDto}.
+     * Finds all entities from the storage, filters them by the given params
+     * and maps them to {@link GiftCertificateDto}.
      *
-     * @param page current page.
-     * @return list of all {@code GiftCertificateDtos}.
+     * @param filters filtering args.
+     * @param page    current page.
+     * @return list of {@code GiftCertificateDtos}.
      */
-    List<GiftCertificateDto> findAll(Page page);
+    List<GiftCertificateDto> findAll(GiftCertificateFilters filters, Page page);
 
     /**
      * Finds entity by id and maps it to {@link GiftCertificateDto}.
