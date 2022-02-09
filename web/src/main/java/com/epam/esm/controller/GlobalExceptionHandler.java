@@ -9,6 +9,7 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +75,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadSqlGrammarException.class)
     protected ResponseEntity<Object> handleBadSqlGrammarException(BadSqlGrammarException ex) {
         logger.error("BadSqlGrammarException occurred", ex);
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        int customStatusCode = CustomStatus.INVALID_INPUT_PARAMS.getValue();
+        String message = "Some input params are invalid";
+        return buildResponse(status, customStatusCode, message);
+    }
+
+    @ExceptionHandler(InvalidDataAccessApiUsageException.class)
+    protected ResponseEntity<Object> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException ex) {
+        logger.error("InvalidDataAccessApiUsageException occurred", ex);
         HttpStatus status = HttpStatus.BAD_REQUEST;
         int customStatusCode = CustomStatus.INVALID_INPUT_PARAMS.getValue();
         String message = "Some input params are invalid";
