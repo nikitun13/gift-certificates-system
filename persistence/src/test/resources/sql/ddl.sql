@@ -21,3 +21,27 @@ CREATE TABLE gift_certificate_tag
     tag_id              BIGINT NOT NULL REFERENCES tag (id) ON DELETE CASCADE,
     PRIMARY KEY (gift_certificate_id, tag_id)
 );
+
+CREATE TABLE users
+(
+    id       BIGSERIAL PRIMARY KEY,
+    username varchar(128) NOT NULL UNIQUE
+);
+
+CREATE TABLE orders
+(
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     BIGINT    NOT NULL REFERENCES users (id),
+    create_date TIMESTAMP NOT NULL,
+    total_price BIGINT    NOT NULL
+);
+
+CREATE TABLE order_detail
+(
+    id                  BIGSERIAL PRIMARY KEY,
+    gift_certificate_id BIGINT  NOT NULL REFERENCES gift_certificate (id),
+    order_id            BIGINT  NOT NULL REFERENCES orders (id) ON DELETE CASCADE,
+    price               BIGINT  NOT NULL,
+    quantity            INTEGER NOT NULL,
+    UNIQUE (gift_certificate_id, order_id)
+);
