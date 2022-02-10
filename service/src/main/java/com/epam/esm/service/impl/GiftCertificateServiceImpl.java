@@ -6,7 +6,7 @@ import com.epam.esm.dto.GiftCertificateFilters;
 import com.epam.esm.dto.Page;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.mapper.Mapper;
+import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,33 +20,30 @@ import java.util.Optional;
 public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private final GiftCertificateDao giftCertificateDao;
-    private final Mapper<GiftCertificate, GiftCertificateDto> giftCertificateDtoMapper;
-    private final Mapper<GiftCertificate, UpdateGiftCertificateDto> updateGiftCertificateDtoMapper;
+    private final GiftCertificateMapper giftCertificateMapper;
 
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao,
-                                      Mapper<GiftCertificate, GiftCertificateDto> giftCertificateDtoMapper,
-                                      Mapper<GiftCertificate, UpdateGiftCertificateDto> updateGiftCertificateDtoMapper) {
+                                      GiftCertificateMapper giftCertificateMapper) {
         this.giftCertificateDao = giftCertificateDao;
-        this.giftCertificateDtoMapper = giftCertificateDtoMapper;
-        this.updateGiftCertificateDtoMapper = updateGiftCertificateDtoMapper;
+        this.giftCertificateMapper = giftCertificateMapper;
     }
 
     @Override
     public List<GiftCertificateDto> findAll(GiftCertificateFilters filters, Page page) {
         return giftCertificateDao.findAll(filters, page).stream()
-                .map(giftCertificateDtoMapper::mapToDto)
+                .map(giftCertificateMapper::toGiftCertificateDto)
                 .toList();
     }
 
     @Override
     public Optional<GiftCertificateDto> findById(Long id) {
         return giftCertificateDao.findById(id)
-                .map(giftCertificateDtoMapper::mapToDto);
+                .map(giftCertificateMapper::toGiftCertificateDto);
     }
 
     @Override
     public boolean update(UpdateGiftCertificateDto updateGiftCertificateDto, Long id) {
-        GiftCertificate entity = updateGiftCertificateDtoMapper.mapToEntity(updateGiftCertificateDto);
+        GiftCertificate entity = giftCertificateMapper.toGiftCertificate(updateGiftCertificateDto);
         entity.setId(id);
         LocalDateTime now = LocalDateTime.now();
         entity.setLastUpdateDate(now);
@@ -60,11 +57,11 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public GiftCertificateDto create(UpdateGiftCertificateDto createGiftCertificateDto) {
-        GiftCertificate entity = updateGiftCertificateDtoMapper.mapToEntity(createGiftCertificateDto);
+        GiftCertificate entity = giftCertificateMapper.toGiftCertificate(createGiftCertificateDto);
         LocalDateTime now = LocalDateTime.now();
         entity.setCreateDate(now);
         entity.setLastUpdateDate(now);
         giftCertificateDao.create(entity);
-        return giftCertificateDtoMapper.mapToDto(entity);
+        return giftCertificateMapper.toGiftCertificateDto(entity);
     }
 }
