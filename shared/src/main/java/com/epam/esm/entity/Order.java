@@ -89,6 +89,14 @@ public class Order implements BaseEntity<Long> {
         this.user = user;
     }
 
+    public List<OrderDetail> getDetails() {
+        return details;
+    }
+
+    public void setDetails(List<OrderDetail> details) {
+        this.details = details;
+    }
+
     @Override
     public Long getId() {
         return id;
