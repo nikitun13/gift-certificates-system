@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -32,8 +33,8 @@ public class TagController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TagDto>> findAll() {
-        List<TagDto> result = tagService.findAll(new Page(1));
+    public ResponseEntity<List<TagDto>> findAll(@Valid Page page) {
+        List<TagDto> result = tagService.findAll(page);
         return ResponseEntity.ok(result);
     }
 
