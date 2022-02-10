@@ -5,9 +5,8 @@ import com.epam.esm.dto.CreateTagDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.dto.Page;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.mapper.Mapper;
+import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,30 +18,24 @@ import java.util.Optional;
 public class TagServiceImpl implements TagService {
 
     private final TagDao tagDao;
-    private final Mapper<Tag, TagDto> tagDtoMapper;
-    private final Mapper<Tag, CreateTagDto> createTagDtoMapper;
+    private final TagMapper tagMapper;
 
-    @Autowired
-    public TagServiceImpl(TagDao tagDao,
-                          Mapper<Tag, TagDto> tagDtoMapper,
-                          Mapper<Tag, CreateTagDto> createTagDtoMapper) {
+    public TagServiceImpl(TagDao tagDao, TagMapper tagMapper) {
         this.tagDao = tagDao;
-        this.tagDtoMapper = tagDtoMapper;
-        this.createTagDtoMapper = createTagDtoMapper;
+        this.tagMapper = tagMapper;
     }
 
     @Override
     public List<TagDto> findAll(Page page) {
-        return tagDao.findAll(page)
-                .stream()
-                .map(tagDtoMapper::mapToDto)
+        return tagDao.findAll(page).stream()
+                .map(tagMapper::toTagDto)
                 .toList();
     }
 
     @Override
     public Optional<TagDto> findById(Long id) {
         return tagDao.findById(id)
-                .map(tagDtoMapper::mapToDto);
+                .map(tagMapper::toTagDto);
     }
 
     @Override
@@ -52,14 +45,14 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public TagDto create(CreateTagDto createTagDto) {
-        Tag entity = createTagDtoMapper.mapToEntity(createTagDto);
+        Tag entity = tagMapper.toTag(createTagDto);
         tagDao.create(entity);
-        return tagDtoMapper.mapToDto(entity);
+        return tagMapper.toTagDto(entity);
     }
 
     @Override
     public Optional<TagDto> findByName(String name) {
         return tagDao.findByName(name)
-                .map(tagDtoMapper::mapToDto);
+                .map(tagMapper::toTagDto);
     }
 }
