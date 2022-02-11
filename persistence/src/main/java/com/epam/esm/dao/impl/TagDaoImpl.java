@@ -16,14 +16,11 @@ public class TagDaoImpl extends AbstractDao<Long, Tag> implements TagDao {
 
     @Override
     public Optional<Tag> findByName(String name) {
-
-        var resultList = entityManager.createQuery(
-                        "FROM Tag WHERE name = :name", Tag.class)
+        return entityManager.createQuery(
+                        "SELECT t FROM Tag t WHERE t.name = :name", Tag.class)
                 .setParameter("name", name)
-                .getResultList();
-        return resultList.isEmpty()
-                ? Optional.empty()
-                : Optional.of(resultList.get(0));
+                .getResultStream()
+                .findFirst();
     }
 
     @Override
