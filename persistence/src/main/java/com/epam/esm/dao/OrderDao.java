@@ -2,6 +2,7 @@ package com.epam.esm.dao;
 
 import com.epam.esm.dto.Page;
 import com.epam.esm.entity.Order;
+import com.epam.esm.entity.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,20 +17,20 @@ import java.util.Optional;
 public interface OrderDao extends BaseDao<Long, Order> {
 
     /**
-     * Finds orders by the given {@code userId}.
+     * Finds orders by the given {@link User}.
      *
-     * @param userId {@code id} of the {@code User}.
-     * @param page   page for limit and offset.
+     * @param user {@link User} whose orders are to be found.
+     * @param page page for limit and offset.
      * @return list of orders by the given {@code User}.
      */
-    List<Order> findByUserId(Long userId, Page page);
+    List<Order> findByUser(User user, Page page);
 
     /**
      * Finds order by the given {@code User} and {@code id}.
      *
-     * @param userId {@code id} of the {@code User}.
-     * @param id     {@code id} of the order.
-     * @return {@link Optional} {@code order} with details.
+     * @param user {@link User} whose order is to be found.
+     * @param id   {@code id} of the order.
+     * @return {@link Optional} {@code order}. Empty optional if order is not found.
      */
-    Optional<Order> findByUserIdAndId(Long userId, Long id);
+    Optional<Order> findByUserAndId(User user, Long id);
 }
