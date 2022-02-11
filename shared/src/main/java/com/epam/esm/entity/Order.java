@@ -166,7 +166,7 @@ public class Order implements BaseEntity<Long> {
             return this;
         }
 
-        public Order createOrder() {
+        public Order build() {
             return new Order(id, user, createDate, totalPrice, details);
         }
     }

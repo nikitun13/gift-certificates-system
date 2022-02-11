@@ -1,5 +1,7 @@
 package com.epam.esm.entity;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -43,6 +45,12 @@ public class OrderDetail implements BaseEntity<Long> {
 
     public static OrderDetailBuilder builder() {
         return new OrderDetailBuilder();
+    }
+
+    public long countTotalPrice() {
+        return ObjectUtils.allNotNull(price, quantity)
+                ? price * quantity
+                : 0L;
     }
 
     public Integer getQuantity() {
@@ -119,7 +127,7 @@ public class OrderDetail implements BaseEntity<Long> {
             return this;
         }
 
-        public OrderDetail createOrderDetail() {
+        public OrderDetail build() {
             return new OrderDetail(id, giftCertificate, order, price, quantity);
         }
     }

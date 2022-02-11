@@ -117,7 +117,7 @@ public class User implements BaseEntity<Long> {
             return this;
         }
 
-        public User createUser() {
+        public User build() {
             return new User(id, username, orders);
         }
     }
