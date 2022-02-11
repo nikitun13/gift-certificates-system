@@ -1,9 +1,10 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.CreateOrderDto;
 import com.epam.esm.dto.DetailedOrderDto;
+import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.OrderDto;
 import com.epam.esm.dto.Page;
-import com.epam.esm.dto.UserDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,20 +12,31 @@ import java.util.Optional;
 public interface OrderService {
 
     /**
-     * Finds orders by the given {@code User}.
+     * Finds orders by the given {@code userId}.
      *
-     * @param userDto {@code dto} of the {@code User}.
-     * @param page    page for limit and offset.
-     * @return list of {@code orders} by the given {@code User}.
+     * @param userId {@code id} of the {@code User}.
+     * @param page   page for limit and offset.
+     * @return list of {@code orders} by the given {@code userId}.
      */
-    List<OrderDto> findByUser(UserDto userDto, Page page);
+    List<OrderDto> findByUserId(Long userId, Page page);
 
     /**
-     * Finds order with details by the given {@code User} and {@code id}.
+     * Finds order with details by the given {@code userId} and {@code id}.
      *
-     * @param userDto {@code dto} of the {@code User}.
-     * @param id      {@code id} of the order.
-     * @return {@link Optional} {@code order} with details.
+     * @param userId {@code id} of the {@code User}.
+     * @param id     {@code id} of the order.
+     * @return {@link Optional} {@link DetailedOrderDto}.
+     * Empty optional if {@code order} wasn't found.
      */
-    Optional<DetailedOrderDto> findByUserAndId(UserDto userDto, Long id);
+    Optional<DetailedOrderDto> findByUserIdAndId(Long userId, Long id);
+
+    /**
+     * Creates new {@code Order} in the storage.
+     * Uses {@link CreateOrderDto} and {@code userId} for creation.
+     *
+     * @param createOrderDto dto that contains information for creation.
+     * @param userId         {@code id} of the user who makes the order.
+     * @return created entity that mapped to {@link GiftCertificateDto}.
+     */
+    DetailedOrderDto create(CreateOrderDto createOrderDto, Long userId);
 }
