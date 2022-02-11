@@ -2,6 +2,7 @@ package com.epam.esm.mapper;
 
 import com.epam.esm.dto.CreateTagDto;
 import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.GiftCertificateDtoWithoutTags;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
@@ -21,6 +22,8 @@ public abstract class GiftCertificateMapper {
     protected TagMapper tagMapper;
 
     public abstract GiftCertificateDto toGiftCertificateDto(GiftCertificate giftCertificate);
+
+    public abstract GiftCertificateDtoWithoutTags toGiftCertificateDtoWithoutTags(GiftCertificate giftCertificate);
 
     @Mapping(target = "tags")
     @Mapping(target = "id", ignore = true)
