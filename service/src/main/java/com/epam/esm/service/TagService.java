@@ -1,8 +1,8 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.CreateTagDto;
-import com.epam.esm.dto.TagDto;
 import com.epam.esm.dto.Page;
+import com.epam.esm.dto.TagDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,4 +56,13 @@ public interface TagService {
      * @return Optional {@code TagDto}.
      */
     Optional<TagDto> findByName(String name);
+
+    /**
+     * Finds the most widely used tag of a user
+     * with the highest cost of all orders.
+     *
+     * @return {@link Optional} {@link TagDto}.
+     * Empty optional if nothing found.
+     */
+    Optional<TagDto> findTopTagOfUserWithTheHighestCostOfAllOrders();
 }

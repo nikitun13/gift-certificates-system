@@ -21,6 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/tags", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,5 +61,11 @@ public class TagController {
             return ResponseEntity.noContent().build();
         }
         throw new EntityNotFoundException(id);
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<TagDto> findTopTagOfUserWithTheHighestCostOfAllOrders() {
+        Optional<TagDto> maybeTopTag = tagService.findTopTagOfUserWithTheHighestCostOfAllOrders();
+        return ResponseEntity.of(maybeTopTag);
     }
 }

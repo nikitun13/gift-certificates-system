@@ -10,6 +10,24 @@ import java.util.Optional;
 @Repository
 public class TagDaoImpl extends AbstractDao<Long, Tag> implements TagDao {
 
+    private static final String TOP_TAG_SQL = """
+            SELECT t.id, t.name
+            FROM (SELECT id
+                  FROM orders
+                  WHERE user_id = (SELECT user_id
+                                   FROM orders
+                                   GROUP BY user_id
+                                   ORDER BY sum(total_price) DESC
+                                   LIMIT 1) -- select top user
+                 ) o -- select all orders by this user
+                     JOIN order_detail od on o.id = od.order_id
+                     JOIN gift_certificate gc on gc.id = od.gift_certificate_id
+                     JOIN gift_certificate_tag gct on gc.id = gct.gift_certificate_id
+                     JOIN tag t on t.id = gct.tag_id
+            GROUP BY t.id
+            ORDER BY sum(od.quantity) DESC
+            LIMIT 1""";
+
     public TagDaoImpl(EntityManager entityManager) {
         super(Tag.class, entityManager);
     }
@@ -27,6 +45,14 @@ public class TagDaoImpl extends AbstractDao<Long, Tag> implements TagDao {
     public Tag createIfNotExists(Tag tag) {
         Optional<Tag> maybeTag = findByName(tag.getName());
         return maybeTag.orElseGet(() -> create(tag));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<Tag> findTopTagOfUserWithTheHighestCostOfAllOrders() {
+        return entityManager.createNativeQuery(TOP_TAG_SQL, Tag.class)
+                .getResultStream()
+                .findFirst();
     }
 
     @Override

@@ -55,4 +55,10 @@ public class TagServiceImpl implements TagService {
         return tagDao.findByName(name)
                 .map(tagMapper::toTagDto);
     }
+
+    @Override
+    public Optional<TagDto> findTopTagOfUserWithTheHighestCostOfAllOrders() {
+        return tagDao.findTopTagOfUserWithTheHighestCostOfAllOrders()
+                .map(tagMapper::toTagDto);
+    }
 }

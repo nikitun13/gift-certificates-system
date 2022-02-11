@@ -30,4 +30,13 @@ public interface TagDao extends BaseDao<Long, Tag> {
      * @return created or existing entity.
      */
     Tag createIfNotExists(Tag tag);
+
+    /**
+     * Finds the most widely used tag of a user
+     * with the highest cost of all orders.
+     *
+     * @return {@link Optional} {@link Tag}.
+     * Empty optional if nothing found.
+     */
+    Optional<Tag> findTopTagOfUserWithTheHighestCostOfAllOrders();
 }
