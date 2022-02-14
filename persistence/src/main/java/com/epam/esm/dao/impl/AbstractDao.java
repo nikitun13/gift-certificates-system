@@ -2,8 +2,9 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.BaseDao;
 import com.epam.esm.entity.BaseEntity;
-import com.epam.esm.dto.Page;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
@@ -11,8 +12,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-@Transactional
 public abstract class AbstractDao<K extends Serializable, E extends BaseEntity<K>> implements BaseDao<K, E> {
+
+    private static final String COUNT_FORMAT = "SELECT COUNT(e) FROM %s e";
 
     private final Class<E> entityClass;
     protected final EntityManager entityManager;
@@ -23,15 +25,17 @@ public abstract class AbstractDao<K extends Serializable, E extends BaseEntity<K
     }
 
     @Override
-    public List<E> findAll(Page page) {
+    public Page<E> findAll(Pageable pageable) {
         CriteriaQuery<E> criteria = entityManager.getCriteriaBuilder().createQuery(entityClass);
-        int offset = page.getOffset();
-        int pageSize = page.pageSize();
+        int offset = (int) pageable.getOffset();
+        int pageSize = pageable.getPageSize();
         criteria.from(entityClass);
-        return entityManager.createQuery(criteria)
+        List<E> content = entityManager.createQuery(criteria)
                 .setFirstResult(offset)
                 .setMaxResults(pageSize)
                 .getResultList();
+        long total = count();
+        return new PageImpl<>(content, pageable, total);
     }
 
     @Override
@@ -48,7 +52,7 @@ public abstract class AbstractDao<K extends Serializable, E extends BaseEntity<K
     @Override
     public boolean update(E entity) {
         Optional<E> maybeEntity = findById(entity.getId());
-        maybeEntity.ifPresent(persistedEntity -> update(persistedEntity, entity));
+        maybeEntity.ifPresent(managedEntity -> update(managedEntity, entity));
         return maybeEntity.isPresent();
     }
 
@@ -59,17 +63,24 @@ public abstract class AbstractDao<K extends Serializable, E extends BaseEntity<K
         return maybeEntity.isPresent();
     }
 
+    @Override
+    public long count() {
+        return entityManager.createQuery(
+                        COUNT_FORMAT.formatted(entityClass.getName()), Long.class)
+                .getSingleResult();
+    }
+
     /**
-     * Merges new entity to persisted one.
+     * Merges new entity to managed one.
      * Updates not null fields from the new entity.
      *
-     * @param persistedEntity persisted entity to be updated.
-     * @param newEntity       new entity with optional fields for updating.
+     * @param managedEntity managed entity to be updated.
+     * @param newEntity     new entity with optional fields for updating.
      */
-    protected abstract void mergeEntities(E persistedEntity, E newEntity);
+    protected abstract void setNotNullFieldsToManagedEntity(E managedEntity, E newEntity);
 
     private void update(E persistedEntity, E newEntity) {
-        mergeEntities(persistedEntity, newEntity);
+        setNotNullFieldsToManagedEntity(persistedEntity, newEntity);
         entityManager.merge(persistedEntity);
     }
 }
