@@ -18,7 +18,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "orders")
-public class Order implements BaseEntity<Long> {
+public class Order extends AuditableEntity implements BaseEntity<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,9 +27,6 @@ public class Order implements BaseEntity<Long> {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @Column(nullable = false)
-    private LocalDateTime createDate;
 
     @Column(nullable = false)
     private Long totalPrice;
@@ -71,14 +68,6 @@ public class Order implements BaseEntity<Long> {
 
     public void setTotalPrice(Long totalPrice) {
         this.totalPrice = totalPrice;
-    }
-
-    public LocalDateTime getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(LocalDateTime createDate) {
-        this.createDate = createDate;
     }
 
     public User getUser() {

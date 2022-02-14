@@ -2,7 +2,14 @@ package com.epam.esm.entity;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +17,7 @@ import java.util.Objects;
 
 @Entity
 @DynamicUpdate
-public class GiftCertificate implements BaseEntity<Long> {
+public class GiftCertificate extends AuditableEntity implements BaseEntity<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,12 +34,6 @@ public class GiftCertificate implements BaseEntity<Long> {
 
     @Column(nullable = false)
     private Integer duration;
-
-    @Column(nullable = false)
-    private LocalDateTime createDate;
-
-    @Column(nullable = false)
-    private LocalDateTime lastUpdateDate;
 
     @ManyToMany
     @JoinTable(name = "gift_certificate_tag",
@@ -99,14 +100,6 @@ public class GiftCertificate implements BaseEntity<Long> {
         return duration;
     }
 
-    public LocalDateTime getCreateDate() {
-        return createDate;
-    }
-
-    public LocalDateTime getLastUpdateDate() {
-        return lastUpdateDate;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -121,14 +114,6 @@ public class GiftCertificate implements BaseEntity<Long> {
 
     public void setDuration(Integer duration) {
         this.duration = duration;
-    }
-
-    public void setCreateDate(LocalDateTime createDate) {
-        this.createDate = createDate;
-    }
-
-    public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
     }
 
     @Override
