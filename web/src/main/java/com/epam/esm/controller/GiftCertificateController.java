@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,7 +55,7 @@ public class GiftCertificateController {
                 .map(this::buildRepresentationModelWithSelfLink);
 
         List<?> content = page.getContent();
-        PagedModel.PageMetadata metadata = paginationUtil.buildPageMetadata(page);
+        PageMetadata metadata = paginationUtil.buildPageMetadata(page);
         Link selfLink = linkTo(methodOn(GiftCertificateController.class)
                 .findAll(filters, pageable))
                 .withSelfRel();

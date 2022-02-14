@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +54,7 @@ public class UserController {
                 .map(this::buildRepresentationModelWithLinks);
 
         List<?> content = page.getContent();
-        PagedModel.PageMetadata metadata = paginationUtil.buildPageMetadata(page);
+        PageMetadata metadata = paginationUtil.buildPageMetadata(page);
         Link selfLink = linkTo(methodOn(UserController.class)
                 .findAll(pageable))
                 .withSelfRel();
@@ -74,7 +75,7 @@ public class UserController {
                 .map(dto -> buildRepresentationModelWithSelfLink(dto, id));
 
         List<?> content = page.getContent();
-        PagedModel.PageMetadata metadata = paginationUtil.buildPageMetadata(page);
+        PageMetadata metadata = paginationUtil.buildPageMetadata(page);
         Link selfLink = linkTo(methodOn(UserController.class)
                 .findOrdersByUser(id, pageable))
                 .withSelfRel();
