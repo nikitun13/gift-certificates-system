@@ -12,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -44,8 +43,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public boolean update(UpdateGiftCertificateDto updateGiftCertificateDto, Long id) {
         GiftCertificate entity = giftCertificateMapper.toGiftCertificate(updateGiftCertificateDto);
         entity.setId(id);
-        LocalDateTime now = LocalDateTime.now();
-        entity.setLastUpdateDate(now);
         return giftCertificateDao.update(entity);
     }
 
@@ -57,9 +54,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     public GiftCertificateDto create(UpdateGiftCertificateDto createGiftCertificateDto) {
         GiftCertificate entity = giftCertificateMapper.toGiftCertificate(createGiftCertificateDto);
-        LocalDateTime now = LocalDateTime.now();
-        entity.setCreateDate(now);
-        entity.setLastUpdateDate(now);
         giftCertificateDao.create(entity);
         return giftCertificateMapper.toGiftCertificateDto(entity);
     }

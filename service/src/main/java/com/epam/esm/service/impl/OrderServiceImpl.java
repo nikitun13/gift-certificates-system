@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -68,8 +67,6 @@ public class OrderServiceImpl implements OrderService {
             detail.setPrice(price);
             totalPrice += detail.countTotalPrice();
         }
-        LocalDateTime now = LocalDateTime.now();
-        order.setCreateDate(now);
         order.setTotalPrice(totalPrice);
         orderDao.create(order);
         return orderMapper.toDetailedOrderDto(order);
