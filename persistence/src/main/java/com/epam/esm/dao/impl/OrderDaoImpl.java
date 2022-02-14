@@ -1,9 +1,11 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.OrderDao;
-import com.epam.esm.dto.Page;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -18,26 +20,29 @@ public class OrderDaoImpl extends AbstractDao<Long, Order> implements OrderDao {
     }
 
     @Override
-    protected void mergeEntities(Order persistedEntity, Order newEntity) {
+    protected void setNotNullFieldsToManagedEntity(Order managedEntity, Order newEntity) {
         var user = Optional.ofNullable(newEntity.getUser());
         var createDate = Optional.ofNullable(newEntity.getCreateDate());
         var totalPrice = Optional.ofNullable(newEntity.getTotalPrice());
 
-        newEntity.getDetails().forEach(persistedEntity::addDetail);
-        user.ifPresent(persistedEntity::setUser);
-        createDate.ifPresent(persistedEntity::setCreateDate);
-        totalPrice.ifPresent(persistedEntity::setTotalPrice);
+        newEntity.getDetails().forEach(managedEntity::addDetail);
+        user.ifPresent(managedEntity::setUser);
+        createDate.ifPresent(managedEntity::setCreateDate);
+        totalPrice.ifPresent(managedEntity::setTotalPrice);
     }
 
     @Override
-    public List<Order> findByUser(User user, Page page) {
-        int offset = page.getOffset();
-        int pageSize = page.pageSize();
-        return entityManager.createQuery("SELECT o FROM Order o WHERE o.user = :user", Order.class)
+    public Page<Order> findByUser(User user, Pageable pageable) {
+        int offset = (int) pageable.getOffset();
+        int pageSize = pageable.getPageSize();
+        List<Order> content = entityManager.createQuery(
+                        "SELECT o FROM Order o WHERE o.user = :user", Order.class)
                 .setParameter("user", user)
                 .setFirstResult(offset)
                 .setMaxResults(pageSize)
                 .getResultList();
+        long total = countByUser(user);
+        return new PageImpl<>(content, pageable, total);
     }
 
     @Override
@@ -48,5 +53,12 @@ public class OrderDaoImpl extends AbstractDao<Long, Order> implements OrderDao {
                 .setParameter("user", user)
                 .getResultStream()
                 .findFirst();
+    }
+
+    @Override
+    public long countByUser(User user) {
+        return entityManager.createQuery("SELECT count(o) FROM Order o WHERE o.user = :user", Long.class)
+                .setParameter("user", user)
+                .getSingleResult();
     }
 }

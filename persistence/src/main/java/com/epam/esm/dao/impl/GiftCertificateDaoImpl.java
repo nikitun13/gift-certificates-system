@@ -3,11 +3,13 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.GiftCertificateFilters;
-import com.epam.esm.dto.Page;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.util.JpaUtil;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -41,10 +43,10 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
     }
 
     @Override
-    protected void mergeEntities(GiftCertificate persistedEntity, GiftCertificate newEntity) {
+    protected void setNotNullFieldsToManagedEntity(GiftCertificate managedEntity, GiftCertificate newEntity) {
         newEntity.getTags().stream()
                 .map(tagDao::createIfNotExists)
-                .forEach(persistedEntity::addTag);
+                .forEach(managedEntity::addTag);
         var name = Optional.ofNullable(newEntity.getName());
         var description = Optional.ofNullable(newEntity.getDescription());
         var price = Optional.ofNullable(newEntity.getPrice());
@@ -52,12 +54,12 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
         var createDate = Optional.ofNullable(newEntity.getCreateDate());
         var lastUpdateDate = Optional.ofNullable(newEntity.getLastUpdateDate());
 
-        name.ifPresent(persistedEntity::setName);
-        description.ifPresent(persistedEntity::setDescription);
-        price.ifPresent(persistedEntity::setPrice);
-        duration.ifPresent(persistedEntity::setDuration);
-        createDate.ifPresent(persistedEntity::setCreateDate);
-        lastUpdateDate.ifPresent(persistedEntity::setLastUpdateDate);
+        name.ifPresent(managedEntity::setName);
+        description.ifPresent(managedEntity::setDescription);
+        price.ifPresent(managedEntity::setPrice);
+        duration.ifPresent(managedEntity::setDuration);
+        createDate.ifPresent(managedEntity::setCreateDate);
+        lastUpdateDate.ifPresent(managedEntity::setLastUpdateDate);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
     }
 
     @Override
-    public List<GiftCertificate> findAll(GiftCertificateFilters filters, Page page) {
+    public Page<GiftCertificate> findAll(GiftCertificateFilters filters, Pageable pageable) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> criteria = cb.createQuery(GiftCertificate.class);
         Root<GiftCertificate> giftCertificate = criteria.from(GiftCertificate.class);
@@ -81,13 +83,15 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
         maybePredicates.ifPresent(criteria::where);
         maybeOrders.ifPresent(criteria::orderBy);
 
-        int offset = page.getOffset();
-        int pageSize = page.pageSize();
-
-        return entityManager.createQuery(criteria)
+        int offset = (int) pageable.getOffset();
+        int pageSize = pageable.getPageSize();
+        List<GiftCertificate> content = entityManager.createQuery(criteria)
                 .setFirstResult(offset)
                 .setMaxResults(pageSize)
                 .getResultList();
+        long total = count();
+
+        return new PageImpl<>(content, pageable, total);
     }
 
     private Optional<Predicate[]> buildPredicates(CriteriaBuilder cb,
