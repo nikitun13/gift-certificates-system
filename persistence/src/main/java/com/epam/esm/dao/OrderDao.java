@@ -1,10 +1,10 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.dto.Page;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -19,11 +19,11 @@ public interface OrderDao extends BaseDao<Long, Order> {
     /**
      * Finds orders by the given {@link User}.
      *
-     * @param user {@link User} whose orders are to be found.
-     * @param page page for limit and offset.
+     * @param user     {@link User} whose orders are to be found.
+     * @param pageable pagination information.
      * @return list of orders by the given {@code User}.
      */
-    List<Order> findByUser(User user, Page page);
+    Page<Order> findByUser(User user, Pageable pageable);
 
     /**
      * Finds order by the given {@code User} and {@code id}.
@@ -33,4 +33,12 @@ public interface OrderDao extends BaseDao<Long, Order> {
      * @return {@link Optional} {@code order}. Empty optional if order is not found.
      */
     Optional<Order> findByUserAndId(User user, Long id);
+
+    /**
+     * Counts number of orders in the database
+     * by the given {@code User}.
+     *
+     * @return number of orders by the given {@code user}.
+     */
+    long countByUser(User user);
 }
