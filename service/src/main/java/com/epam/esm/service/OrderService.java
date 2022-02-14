@@ -4,9 +4,9 @@ import com.epam.esm.dto.CreateOrderDto;
 import com.epam.esm.dto.DetailedOrderDto;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface OrderService {
@@ -14,11 +14,11 @@ public interface OrderService {
     /**
      * Finds orders by the given {@code userId}.
      *
-     * @param userId {@code id} of the {@code User}.
-     * @param page   page for limit and offset.
+     * @param userId   {@code id} of the {@code User}.
+     * @param pageable pagination information.
      * @return list of {@code orders} by the given {@code userId}.
      */
-    List<OrderDto> findByUserId(Long userId, Page page);
+    Page<OrderDto> findByUserId(Long userId, Pageable pageable);
 
     /**
      * Finds order with details by the given {@code userId} and {@code id}.

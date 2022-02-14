@@ -1,10 +1,10 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.CreateTagDto;
-import com.epam.esm.dto.Page;
 import com.epam.esm.dto.TagDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,10 +17,10 @@ public interface TagService {
      * Finds all entities from the storage and maps them
      * to {@link TagDto}.
      *
-     * @param page current page.
+     * @param pageable pagination information.
      * @return list of all {@code TagDtos}.
      */
-    List<TagDto> findAll(Page page);
+    Page<TagDto> findAll(Pageable pageable);
 
     /**
      * Finds entity by {@code id} and maps it to {@link TagDto}.

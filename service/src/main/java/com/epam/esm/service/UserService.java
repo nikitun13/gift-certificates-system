@@ -1,9 +1,9 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.Page;
 import com.epam.esm.dto.UserDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,10 +16,10 @@ public interface UserService {
      * Finds entities from the storage on the given page
      * and maps them to {@link UserDto}.
      *
-     * @param page current page.
+     * @param pageable pagination information.
      * @return list of {@code UserDtos}.
      */
-    List<UserDto> findAll(Page page);
+    Page<UserDto> findAll(Pageable pageable);
 
     /**
      * Finds entity by {@code id} and maps it to {@link UserDto}.

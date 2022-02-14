@@ -3,9 +3,9 @@ package com.epam.esm.service;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.GiftCertificateFilters;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
-import com.epam.esm.dto.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,11 +18,11 @@ public interface GiftCertificateService {
      * Finds all entities from the storage, filters them by the given params
      * and maps them to {@link GiftCertificateDto}.
      *
-     * @param filters filtering args.
-     * @param page    current page.
+     * @param filters  filtering args.
+     * @param pageable pagination information.
      * @return list of {@code GiftCertificateDtos}.
      */
-    List<GiftCertificateDto> findAll(GiftCertificateFilters filters, Page page);
+    Page<GiftCertificateDto> findAll(GiftCertificateFilters filters, Pageable pageable);
 
     /**
      * Finds entity by id and maps it to {@link GiftCertificateDto}.
