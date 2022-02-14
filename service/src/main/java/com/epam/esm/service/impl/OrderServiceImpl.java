@@ -6,7 +6,6 @@ import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.CreateOrderDto;
 import com.epam.esm.dto.DetailedOrderDto;
 import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.Page;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.OrderDetail;
@@ -14,11 +13,12 @@ import com.epam.esm.entity.User;
 import com.epam.esm.exception.EntityNotFoundException;
 import com.epam.esm.mapper.OrderMapper;
 import com.epam.esm.service.OrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,11 +41,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDto> findByUserId(Long userId, Page page) {
+    public Page<OrderDto> findByUserId(Long userId, Pageable pageable) {
         User user = userDao.findById(userId).orElseThrow(() -> new EntityNotFoundException(userId));
-        return orderDao.findByUser(user, page).stream()
-                .map(orderMapper::toOrderDto)
-                .toList();
+        return orderDao.findByUser(user, pageable)
+                .map(orderMapper::toOrderDto);
     }
 
     @Override

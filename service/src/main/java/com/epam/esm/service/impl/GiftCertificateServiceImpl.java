@@ -3,16 +3,16 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.GiftCertificateFilters;
-import com.epam.esm.dto.Page;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mapper.GiftCertificateMapper;
 import com.epam.esm.service.GiftCertificateService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,10 +29,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificateDto> findAll(GiftCertificateFilters filters, Page page) {
-        return giftCertificateDao.findAll(filters, page).stream()
-                .map(giftCertificateMapper::toGiftCertificateDto)
-                .toList();
+    public Page<GiftCertificateDto> findAll(GiftCertificateFilters filters, Pageable pageable) {
+        return giftCertificateDao.findAll(filters, pageable)
+                .map(giftCertificateMapper::toGiftCertificateDto);
     }
 
     @Override

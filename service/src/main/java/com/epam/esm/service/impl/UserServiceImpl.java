@@ -1,14 +1,14 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.UserDao;
-import com.epam.esm.dto.Page;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.mapper.UserMapper;
 import com.epam.esm.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,10 +24,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> findAll(Page page) {
-        return dao.findAll(page).stream()
-                .map(mapper::toUserDto)
-                .toList();
+    public Page<UserDto> findAll(Pageable pageable) {
+        return dao.findAll(pageable)
+                .map(mapper::toUserDto);
     }
 
     @Override
