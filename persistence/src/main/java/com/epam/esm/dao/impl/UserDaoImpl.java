@@ -15,11 +15,11 @@ public class UserDaoImpl extends AbstractDao<Long, User> implements UserDao {
     }
 
     @Override
-    protected void mergeEntities(User persistedEntity, User newEntity) {
+    protected void setNotNullFieldsToManagedEntity(User managedEntity, User newEntity) {
         var username = Optional.ofNullable(newEntity.getUsername());
         newEntity.getOrders()
-                .forEach(persistedEntity::addOrder);
+                .forEach(managedEntity::addOrder);
 
-        username.ifPresent(persistedEntity::setUsername);
+        username.ifPresent(managedEntity::setUsername);
     }
 }

@@ -56,10 +56,10 @@ public class TagDaoImpl extends AbstractDao<Long, Tag> implements TagDao {
     }
 
     @Override
-    protected void mergeEntities(Tag persistedEntity, Tag newEntity) {
+    protected void setNotNullFieldsToManagedEntity(Tag managedEntity, Tag newEntity) {
         var name = Optional.ofNullable(newEntity.getName());
         var certificates = newEntity.getGiftCertificates();
-        name.ifPresent(persistedEntity::setName);
-        persistedEntity.getGiftCertificates().addAll(certificates);
+        name.ifPresent(managedEntity::setName);
+        managedEntity.getGiftCertificates().addAll(certificates);
     }
 }
