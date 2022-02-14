@@ -30,10 +30,11 @@ CREATE TABLE users
 
 CREATE TABLE orders
 (
-    id          BIGSERIAL PRIMARY KEY,
-    user_id     BIGINT    NOT NULL REFERENCES users (id),
-    create_date TIMESTAMP NOT NULL,
-    total_price BIGINT    NOT NULL
+    id               BIGSERIAL PRIMARY KEY,
+    user_id          BIGINT    NOT NULL REFERENCES users (id),
+    create_date      TIMESTAMP NOT NULL,
+    last_update_date TIMESTAMP NOT NULL,
+    total_price      BIGINT    NOT NULL
 );
 
 CREATE TABLE order_detail
