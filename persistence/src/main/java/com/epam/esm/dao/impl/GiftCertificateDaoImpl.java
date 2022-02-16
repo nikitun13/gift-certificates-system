@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -20,11 +21,10 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.function.Predicate.not;
 
 @Repository
 public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> implements GiftCertificateDao {
@@ -89,26 +89,44 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
                 .setFirstResult(offset)
                 .setMaxResults(pageSize)
                 .getResultList();
-        long total = count();
+        long total = countTotalByFilters(filters, cb);
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    private long countTotalByFilters(GiftCertificateFilters filters, CriteriaBuilder cb) {
+        CriteriaQuery<Long> criteria = cb.createQuery(Long.class);
+        Root<GiftCertificate> giftCertificate = criteria.from(GiftCertificate.class);
+        Subquery<GiftCertificate> subquery = criteria.subquery(GiftCertificate.class);
+        Root<GiftCertificate> giftCertificateSubquery = subquery.from(GiftCertificate.class);
+        Optional<Predicate[]> maybePredicates = buildPredicates(
+                cb, giftCertificateSubquery, filters, subquery);
+
+        maybePredicates.ifPresent(subquery::where);
+
+        criteria.select(cb.count(giftCertificate))
+                .where(giftCertificate.in(
+                        subquery.select(giftCertificateSubquery)
+                ));
+        return entityManager.createQuery(criteria)
+                .getSingleResult();
     }
 
     private Optional<Predicate[]> buildPredicates(CriteriaBuilder cb,
                                                   Root<GiftCertificate> giftCertificate,
                                                   GiftCertificateFilters filters,
-                                                  CriteriaQuery<GiftCertificate> criteria) {
+                                                  AbstractQuery<GiftCertificate> criteria) {
         String name = filters.name();
         String description = filters.description();
         List<String> tags = filters.tags();
 
         List<Predicate> predicates = new ArrayList<>();
-        if (ObjectUtils.allNotNull(name)) {
+        if (ObjectUtils.isNotEmpty(name)) {
             String wrappedString = jpaUtil.wrapWithPercentages(name);
             Predicate predicate = cb.like(giftCertificate.get(NAME_ATTRIBUTE), wrappedString);
             predicates.add(predicate);
         }
-        if (ObjectUtils.allNotNull(description)) {
+        if (ObjectUtils.isNotEmpty(description)) {
             String wrappedString = jpaUtil.wrapWithPercentages(description);
             Predicate predicate = cb.like(giftCertificate.get(DESCRIPTION_ATTRIBUTE), wrappedString);
             predicates.add(predicate);
@@ -117,6 +135,7 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
             Join<GiftCertificate, Tag> tag = giftCertificate.join(TAGS_ATTRIBUTE);
             Path<String> tagNameAttr = tag.get(NAME_ATTRIBUTE);
             tags = tags.stream()
+                    .filter(ObjectUtils::isNotEmpty)
                     .distinct()
                     .toList();
             tags.stream()
@@ -136,7 +155,7 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
                                           List<String> orderBy) {
         if (ObjectUtils.isNotEmpty(orderBy)) {
             Order[] orders = orderBy.stream()
-                    .filter(not(String::isBlank))
+                    .filter(ObjectUtils::isNotEmpty)
                     .map(field -> jpaUtil.createOrder(cb, giftCertificate, field))
                     .toArray(Order[]::new);
             return Optional.of(orders);
