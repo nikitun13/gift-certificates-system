@@ -2,121 +2,43 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.config.DaoTestConfig;
-import com.epam.esm.dto.Page;
 import com.epam.esm.entity.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import javax.persistence.EntityManager;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(classes = DaoTestConfig.class)
 @Transactional
+@ActiveProfiles("test")
 class TagDaoImplTest {
 
+    private final TagDao tagDao;
+    private final EntityManager entityManager;
+
     @Autowired
-    private TagDao tagDao;
-
-    private final Tag cocaColaTag = new Tag(1L, "coca-cola");
-    private final Tag kfcTag = new Tag(2L, "kfc");
-    private final Tag moneyCertificateTag = new Tag(3L, "money certificate");
-    private final Tag unusedTag = new Tag(4L, "unused tag");
-
-    @Test
-    @org.junit.jupiter.api.Tag("findAll")
-    void shouldFindAllTagsFromDB() {
-        List<Tag> expected = List.of(cocaColaTag, kfcTag, moneyCertificateTag, unusedTag);
-
-        List<Tag> actual = tagDao.findAll(new Page(1));
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("findById")
-    void shouldFindTagById() {
-        Optional<Tag> expected = Optional.of(moneyCertificateTag);
-
-        Optional<Tag> actual = tagDao.findById(moneyCertificateTag.getId());
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("findById")
-    void shouldReturnEmptyOptionalIfNoSuchId() {
-        Optional<Tag> actual = tagDao.findById(500L);
-
-        assertThat(actual).isEmpty();
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("create")
-    void shouldSetIdToNewTag() {
-        Tag newTag = Tag.builder().name("new tag").build();
-
-        tagDao.create(newTag);
-
-        assertThat(newTag.getId()).isNotNull();
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("create")
-    void shouldCreateNewTagInDB() {
-        Tag newTag = Tag.builder().name("new tag").build();
-
-        tagDao.create(newTag);
-        Optional<Tag> expected = Optional.of(newTag);
-        Optional<Tag> actual = tagDao.findById(newTag.getId());
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("create")
-    void shouldThrowDataIntegrityViolationExceptionIfSuchNameAlreadyExists() {
-        Tag newTag = Tag.builder().name("kfc").build();
-
-        assertThatThrownBy(() -> tagDao.create(newTag))
-                .isExactlyInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("delete")
-    void shouldDeleteTagById() {
-        List<Tag> expected = List.of(cocaColaTag, moneyCertificateTag, unusedTag);
-
-        tagDao.delete(kfcTag.getId());
-        List<Tag> actual = tagDao.findAll(new Page(1));
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    }
-
-    @Test
-    @org.junit.jupiter.api.Tag("delete")
-    void shouldNotDeleteAnythingIfNoSuchId() {
-        List<Tag> expected = List.of(cocaColaTag, kfcTag, moneyCertificateTag, unusedTag);
-        Long noSuchId = 500L;
-
-        tagDao.delete(noSuchId);
-        List<Tag> actual = tagDao.findAll(new Page(1));
-
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
+    TagDaoImplTest(TagDao tagDao, EntityManager entityManager) {
+        this.tagDao = tagDao;
+        this.entityManager = entityManager;
     }
 
     @Test
     @org.junit.jupiter.api.Tag("findByName")
     void shouldFindTagByName() {
-        Optional<Tag> expected = Optional.of(unusedTag);
-        String name = unusedTag.getName();
+        String tagName = "extreme";
+        Tag tag = entityManager.createQuery("FROM Tag WHERE name = :name", Tag.class)
+                .setParameter("name", tagName)
+                .getSingleResult();
+        Optional<Tag> expected = Optional.of(tag);
 
-        Optional<Tag> actual = tagDao.findByName(name);
+        Optional<Tag> actual = tagDao.findByName(tagName);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -129,5 +51,49 @@ class TagDaoImplTest {
         Optional<Tag> actual = tagDao.findByName(noSuchName);
 
         assertThat(actual).isEmpty();
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("createIfNotExists")
+    void shouldCreateNewTag() {
+        String tagName = "newTag";
+        long count = entityManager.createQuery("FROM Tag WHERE name = :name", Tag.class)
+                .setParameter("name", tagName)
+                .getResultStream()
+                .count();
+        assertThat(count).isZero();
+
+        Tag newTag = Tag.builder().name(tagName).build();
+        tagDao.createIfNotExists(newTag);
+        Long id = newTag.getId();
+
+        assertThat(id).isNotNull();
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("createIfNotExists")
+    void shouldReturnExistingTag() {
+        String tagName = "extreme";
+        Tag expected = entityManager.createQuery("FROM Tag WHERE name = :name", Tag.class)
+                .setParameter("name", tagName)
+                .getSingleResult();
+
+        Tag newTag = Tag.builder().name(tagName).build();
+        Tag actual = tagDao.createIfNotExists(newTag);
+        Long id = newTag.getId();
+
+        assertThat(id).isNull();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    @org.junit.jupiter.api.Tag("findTopTagOfUserWithTheHighestCostOfAllOrders")
+    void findTopTagOfUserWithTheHighestCostOfAllOrders() {
+        Long id = 1L;
+        Optional<Tag> expected = Optional.of(entityManager.find(Tag.class, id));
+
+        Optional<Tag> actual = tagDao.findTopTagOfUserWithTheHighestCostOfAllOrders();
+
+        assertThat(actual).isEqualTo(expected);
     }
 }
