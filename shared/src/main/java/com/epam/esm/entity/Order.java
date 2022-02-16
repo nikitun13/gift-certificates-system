@@ -38,17 +38,21 @@ public class Order extends AuditableEntity implements BaseEntity<Long> {
     public Order() {
     }
 
-    public Order(Long id, User user, LocalDateTime createDate, Long totalPrice) {
+    public Order(Long id, User user, LocalDateTime createDate, LocalDateTime lastUpdateDate, Long totalPrice) {
         this.id = id;
         this.user = user;
         this.createDate = createDate;
+        this.lastUpdateDate = lastUpdateDate;
         this.totalPrice = totalPrice;
     }
 
-    public Order(Long id, User user, LocalDateTime createDate, Long totalPrice, List<OrderDetail> details) {
+    public Order(Long id, User user, LocalDateTime createDate,
+                 LocalDateTime lastUpdateDate, Long totalPrice, List<OrderDetail> details) {
         this.id = id;
         this.user = user;
         this.createDate = createDate;
+        this.lastUpdateDate = lastUpdateDate;
+
         this.totalPrice = totalPrice;
         this.details = details;
     }
@@ -104,12 +108,13 @@ public class Order extends AuditableEntity implements BaseEntity<Long> {
         return Objects.equals(id, order.id)
                 && Objects.equals(user, order.user)
                 && Objects.equals(createDate, order.createDate)
+                && Objects.equals(lastUpdateDate, order.lastUpdateDate)
                 && Objects.equals(totalPrice, order.totalPrice);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, createDate, totalPrice);
+        return Objects.hash(id, user, createDate, lastUpdateDate, totalPrice);
     }
 
     @Override
@@ -118,6 +123,7 @@ public class Order extends AuditableEntity implements BaseEntity<Long> {
                 + "id=" + id
                 + ", user=" + user
                 + ", createDate=" + createDate
+                + ", lastUpdateDate=" + lastUpdateDate
                 + ", totalPrice=" + totalPrice
                 + '}';
     }
@@ -127,6 +133,7 @@ public class Order extends AuditableEntity implements BaseEntity<Long> {
         private Long id;
         private User user;
         private LocalDateTime createDate;
+        private LocalDateTime lastUpdateDate;
         private Long totalPrice;
         private List<OrderDetail> details = new ArrayList<>();
 
@@ -145,6 +152,11 @@ public class Order extends AuditableEntity implements BaseEntity<Long> {
             return this;
         }
 
+        public OrderBuilder setLastUpdateDate(LocalDateTime lastUpdateDate) {
+            this.lastUpdateDate = lastUpdateDate;
+            return this;
+        }
+
         public OrderBuilder setTotalPrice(Long totalPrice) {
             this.totalPrice = totalPrice;
             return this;
@@ -156,7 +168,7 @@ public class Order extends AuditableEntity implements BaseEntity<Long> {
         }
 
         public Order build() {
-            return new Order(id, user, createDate, totalPrice, details);
+            return new Order(id, user, createDate, lastUpdateDate, totalPrice, details);
         }
     }
 }
