@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.util.Objects;
 
 @Entity
 public class OrderDetail implements BaseEntity<Long> {
@@ -95,6 +96,34 @@ public class OrderDetail implements BaseEntity<Long> {
         this.id = id;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderDetail that = (OrderDetail) o;
+        return Objects.equals(id, that.id)
+                && Objects.equals(giftCertificate, that.giftCertificate)
+                && Objects.equals(order, that.order)
+                && Objects.equals(price, that.price)
+                && Objects.equals(quantity, that.quantity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, giftCertificate, order, price, quantity);
+    }
+
+    @Override
+    public String toString() {
+        return "OrderDetail{" +
+                "id=" + id +
+                ", giftCertificate=" + giftCertificate +
+                ", order=" + order +
+                ", price=" + price +
+                ", quantity=" + quantity +
+                '}';
+    }
+
     public static class OrderDetailBuilder {
         private Long id;
         private GiftCertificate giftCertificate;
@@ -102,27 +131,27 @@ public class OrderDetail implements BaseEntity<Long> {
         private Long price;
         private Integer quantity;
 
-        public OrderDetailBuilder setId(Long id) {
+        public OrderDetailBuilder id(Long id) {
             this.id = id;
             return this;
         }
 
-        public OrderDetailBuilder setGiftCertificate(GiftCertificate giftCertificate) {
+        public OrderDetailBuilder giftCertificate(GiftCertificate giftCertificate) {
             this.giftCertificate = giftCertificate;
             return this;
         }
 
-        public OrderDetailBuilder setOrder(Order order) {
+        public OrderDetailBuilder order(Order order) {
             this.order = order;
             return this;
         }
 
-        public OrderDetailBuilder setPrice(Long price) {
+        public OrderDetailBuilder price(Long price) {
             this.price = price;
             return this;
         }
 
-        public OrderDetailBuilder setQuantity(Integer quantity) {
+        public OrderDetailBuilder quantity(Integer quantity) {
             this.quantity = quantity;
             return this;
         }
