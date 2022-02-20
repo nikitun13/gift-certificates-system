@@ -10,6 +10,10 @@ import java.util.Optional;
 @Repository
 public class TagDaoImpl extends AbstractDao<Long, Tag> implements TagDao {
 
+    /**
+     * Native sql query that finds the most widely used tag of a user
+     * with the highest cost of all orders.
+     */
     private static final String TOP_TAG_SQL = """
             SELECT t.id, t.name
             FROM (SELECT id
@@ -25,7 +29,7 @@ public class TagDaoImpl extends AbstractDao<Long, Tag> implements TagDao {
                      JOIN gift_certificate_tag gct on gc.id = gct.gift_certificate_id
                      JOIN tag t on t.id = gct.tag_id
             GROUP BY t.id
-            ORDER BY sum(od.quantity) DESC
+            ORDER BY sum(od.quantity) DESC -- most widely used tag of the given orders
             LIMIT 1""";
 
     public TagDaoImpl(EntityManager entityManager) {
