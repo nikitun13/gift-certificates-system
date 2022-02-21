@@ -23,6 +23,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,6 +95,9 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
         return new PageImpl<>(content, pageable, total);
     }
 
+    /**
+     * Counts total rows the given filters.
+     */
     private long countTotalByFilters(GiftCertificateFilters filters, CriteriaBuilder cb) {
         CriteriaQuery<Long> criteria = cb.createQuery(Long.class);
         Root<GiftCertificate> giftCertificate = criteria.from(GiftCertificate.class);
@@ -112,54 +116,83 @@ public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> i
                 .getSingleResult();
     }
 
+    /**
+     * Builds array of Predicates for filtering GiftCertificates.
+     * Filtering args contain in {@link GiftCertificateFilters}.
+     * All the arguments are optional, but if present, then filter by the following conditions (join by AND condition):
+     * <ul>
+     *     <li>by several tag names (AND condition)</li>
+     *     <li>by part of the gift certificate name</li>
+     *     <li>by part of the description</li>
+     * </ul>
+     */
     private Optional<Predicate[]> buildPredicates(CriteriaBuilder cb,
                                                   Root<GiftCertificate> giftCertificate,
                                                   GiftCertificateFilters filters,
                                                   AbstractQuery<GiftCertificate> criteria) {
         String name = filters.name();
         String description = filters.description();
-        List<String> tags = filters.tags();
+        List<String> tags = Optional.ofNullable(filters.tags())
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(ObjectUtils::isNotEmpty)
+                .distinct()
+                .toList(); // filter empty and repeating tag names
 
         List<Predicate> predicates = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(name)) {
             String wrappedString = jpaUtil.wrapWithPercentages(name);
+            // Predicate that equal to the following sql query: gift_certificate.name like %name%
             Predicate predicate = cb.like(giftCertificate.get(NAME_ATTRIBUTE), wrappedString);
             predicates.add(predicate);
         }
         if (ObjectUtils.isNotEmpty(description)) {
             String wrappedString = jpaUtil.wrapWithPercentages(description);
+            // Predicate that equal to the following sql query: gift_certificate.description like %description%
             Predicate predicate = cb.like(giftCertificate.get(DESCRIPTION_ATTRIBUTE), wrappedString);
             predicates.add(predicate);
         }
+
+        // To find by several tags (AND condition), we should use the following filter:
+        //
+        // WHERE (tag.name = tagName1 OR tag.name = tagName2 OR ...)
+        // GROUP BY gift_certificate.id
+        // HAVING count(t.id) = tagsSize;
+        //
+        // tagsSize - number of tag names that are listed in the WHERE.
+        // In case that we find certificates by tag names with OR condition,
+        // we group certificates by id, so we can count number of rows with that certificate.
+        // The number of the rows with grouped certificate is a number of its tags that satisfy WHERE filters.
+        // So we filter certificates in the HAVING that count number is not equal to tagsSize.
         if (ObjectUtils.isNotEmpty(tags)) {
             Join<GiftCertificate, Tag> tag = giftCertificate.join(TAGS_ATTRIBUTE);
             Path<String> tagNameAttr = tag.get(NAME_ATTRIBUTE);
-            tags = tags.stream()
-                    .filter(ObjectUtils::isNotEmpty)
-                    .distinct()
-                    .toList();
+            criteria.groupBy(giftCertificate)                       // GROUP BY gift_certificate.id
+                    .having(cb.equal(cb.count(tag), tags.size()));  // HAVING count(t.id) = tagsSize;
             tags.stream()
-                    .map(it -> cb.equal(tagNameAttr, it))
-                    .reduce(cb::or)
+                    .map(tagName -> cb.equal(tagNameAttr, tagName)) // Predicate: tag.name = tagName
+                    .reduce(cb::or)                                 // Collect to one Predicate with OR condition
                     .ifPresent(predicates::add);
-            criteria.groupBy(giftCertificate)
-                    .having(cb.equal(cb.count(tag), tags.size()));
         }
         return predicates.isEmpty()
                 ? Optional.empty()
                 : Optional.of(predicates.toArray(Predicate[]::new));
     }
 
+    /**
+     * Builds array of Orders for ordering GiftCertificates.
+     */
     private Optional<Order[]> buildOrders(CriteriaBuilder cb,
                                           Root<GiftCertificate> giftCertificate,
                                           List<String> orderBy) {
-        if (ObjectUtils.isNotEmpty(orderBy)) {
-            Order[] orders = orderBy.stream()
-                    .filter(ObjectUtils::isNotEmpty)
-                    .map(field -> jpaUtil.createOrder(cb, giftCertificate, field))
-                    .toArray(Order[]::new);
-            return Optional.of(orders);
-        }
-        return Optional.empty();
+        Order[] orders = Optional.ofNullable(orderBy)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(ObjectUtils::isNotEmpty)
+                .map(field -> jpaUtil.createOrder(cb, giftCertificate, field)) // creates ordering by the given field
+                .toArray(Order[]::new);                                        // e.g. field ASC or field DESC
+        return ObjectUtils.isNotEmpty(orders)                                  // Asc or desc depends on '-' sign
+                ? Optional.of(orders)                                          // at the beginning of the field name.
+                : Optional.empty();
     }
 }
