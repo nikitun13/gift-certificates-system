@@ -1,20 +1,49 @@
 package com.epam.esm.entity;
 
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class GiftCertificate {
+@Entity
+@DynamicUpdate
+public class GiftCertificate extends AuditableEntity implements BaseEntity<Long> {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String description;
+
+    @Column(nullable = false)
     private Long price;
+
+    @Column(nullable = false)
     private Integer duration;
-    private LocalDateTime createDate;
-    private LocalDateTime lastUpdateDate;
+
+    @ManyToMany
+    @JoinTable(name = "gift_certificate_tag",
+            joinColumns = @JoinColumn(name = "gift_certificate_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private List<Tag> tags = new ArrayList<>();
 
     public GiftCertificate(Long id, String name, String description, Long price,
-                           Integer duration, LocalDateTime createDate, LocalDateTime lastUpdateDate) {
+                           Integer duration, LocalDateTime createDate,
+                           LocalDateTime lastUpdateDate, List<Tag> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -22,6 +51,7 @@ public class GiftCertificate {
         this.duration = duration;
         this.createDate = createDate;
         this.lastUpdateDate = lastUpdateDate;
+        this.tags = tags;
     }
 
     public GiftCertificate() {
@@ -31,8 +61,27 @@ public class GiftCertificate {
         return new GiftCertificateBuilder();
     }
 
+    public void addTag(Tag tag) {
+        tags.add(tag);
+        tag.getGiftCertificates().add(this);
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
     public Long getId() {
         return id;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     public String getName() {
@@ -51,18 +100,6 @@ public class GiftCertificate {
         return duration;
     }
 
-    public LocalDateTime getCreateDate() {
-        return createDate;
-    }
-
-    public LocalDateTime getLastUpdateDate() {
-        return lastUpdateDate;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -77,14 +114,6 @@ public class GiftCertificate {
 
     public void setDuration(Integer duration) {
         this.duration = duration;
-    }
-
-    public void setCreateDate(LocalDateTime createDate) {
-        this.createDate = createDate;
-    }
-
-    public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
     }
 
     @Override
@@ -128,6 +157,7 @@ public class GiftCertificate {
         private Integer duration;
         private LocalDateTime createDate;
         private LocalDateTime lastUpdateDate;
+        private List<Tag> tags = new ArrayList<>();
 
         GiftCertificateBuilder() {
         }
@@ -167,8 +197,13 @@ public class GiftCertificate {
             return this;
         }
 
+        public GiftCertificateBuilder tags(List<Tag> tags) {
+            this.tags = tags;
+            return this;
+        }
+
         public GiftCertificate build() {
-            return new GiftCertificate(id, name, description, price, duration, createDate, lastUpdateDate);
+            return new GiftCertificate(id, name, description, price, duration, createDate, lastUpdateDate, tags);
         }
     }
 }

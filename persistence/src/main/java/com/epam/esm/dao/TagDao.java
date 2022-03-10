@@ -2,7 +2,6 @@ package com.epam.esm.dao;
 
 import com.epam.esm.entity.Tag;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,10 +23,20 @@ public interface TagDao extends BaseDao<Long, Tag> {
     Optional<Tag> findByName(String name);
 
     /**
-     * Finds all {@code Tags} by {@code GiftCertificate id}.
+     * Creates new {@link Tag} in the storage if not exists.
+     * Returns new or existing {@link Tag}.
      *
-     * @param id {@code id} of the {@code GiftCertificate} entity.
-     * @return list of the all {@code Tags} with the given {@code GiftCertificate id}.
+     * @param tag {@code tag} to be created if not exists.
+     * @return created or existing entity.
      */
-    List<Tag> findByGiftCertificateId(Long id);
+    Tag createIfNotExists(Tag tag);
+
+    /**
+     * Finds the most widely used tag of a user
+     * with the highest cost of all orders.
+     *
+     * @return {@link Optional} {@link Tag}.
+     * Empty optional if nothing found.
+     */
+    Optional<Tag> findTopTagOfUserWithTheHighestCostOfAllOrders();
 }

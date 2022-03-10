@@ -1,10 +1,10 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.CreateTagDto;
-import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,9 +17,10 @@ public interface TagService {
      * Finds all entities from the storage and maps them
      * to {@link TagDto}.
      *
+     * @param pageable pagination information.
      * @return list of all {@code TagDtos}.
      */
-    List<TagDto> findAll();
+    Page<TagDto> findAll(Pageable pageable);
 
     /**
      * Finds entity by {@code id} and maps it to {@link TagDto}.
@@ -48,15 +49,6 @@ public interface TagService {
     TagDto create(CreateTagDto createTagDto);
 
     /**
-     * Creates new {@code Tag} in the storage if not exists.
-     * Returns new or existing {@code Tag} mapped to {@link TagDto}.
-     *
-     * @param createTagDto {@code dto} for creation new entity.
-     * @return created entity or existing entity that mapped to {@link TagDto}.
-     */
-    TagDto createIfNotExists(CreateTagDto createTagDto);
-
-    /**
      * Finds entity by {@code name} and maps it to {@link TagDto}.
      * If no such {@code name} returns empty {@link Optional}.
      *
@@ -66,11 +58,11 @@ public interface TagService {
     Optional<TagDto> findByName(String name);
 
     /**
-     * Finds all entities from the storage with the given {@link GiftCertificateDto}
-     * and maps them to {@link TagDto}.
+     * Finds the most widely used tag of a user
+     * with the highest cost of all orders.
      *
-     * @param giftCertificateDto {@code the certificates} whose {@code Tags} are needed to be received.
-     * @return list of all {@code TagDtos} that have the given {@link GiftCertificateDto}.
+     * @return {@link Optional} {@link TagDto}.
+     * Empty optional if nothing found.
      */
-    List<TagDto> findByGiftCertificate(GiftCertificateDto giftCertificateDto);
+    Optional<TagDto> findTopTagOfUserWithTheHighestCostOfAllOrders();
 }

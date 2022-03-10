@@ -2,77 +2,68 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import javax.persistence.EntityManager;
 import java.util.Optional;
 
 @Repository
-public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
+public class TagDaoImpl extends AbstractDao<Long, Tag> implements TagDao {
 
-    private static final String TABLE_NAME = "tag";
-    private static final String ID_COLUMN_NAME = "id";
+    /**
+     * Native sql query that finds the most widely used tag of a user
+     * with the highest cost of all orders.
+     */
+    private static final String TOP_TAG_SQL = """
+            SELECT t.id, t.name
+            FROM (SELECT id
+                  FROM orders
+                  WHERE user_id = (SELECT user_id
+                                   FROM orders
+                                   GROUP BY user_id
+                                   ORDER BY sum(total_price) DESC
+                                   LIMIT 1) -- select top user
+                 ) o -- select all orders by this user
+                     JOIN order_detail od on o.id = od.order_id
+                     JOIN gift_certificate gc on gc.id = od.gift_certificate_id
+                     JOIN gift_certificate_tag gct on gc.id = gct.gift_certificate_id
+                     JOIN tag t on t.id = gct.tag_id
+            GROUP BY t.id
+            ORDER BY sum(od.quantity) DESC -- most widely used tag of the given orders
+            LIMIT 1""";
 
-    private static final String FIND_ALL_SQL = "SELECT id, name FROM tag";
-    private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + " WHERE id = ?";
-    private static final String FIND_BY_NAME_SQL = FIND_ALL_SQL + " WHERE name = ?";
-    private static final String FIND_BY_CERTIFICATE_ID_SQL = """
-            SELECT tag.id, tag.name
-            FROM tag
-                JOIN gift_certificate_tag gct ON tag.id = gct.tag_id
-                JOIN gift_certificate ON gct.gift_certificate_id = gift_certificate.id
-            WHERE gift_certificate.id = ?""";
-
-    @Autowired
-    public TagDaoImpl(JdbcTemplate jdbcTemplate) {
-        super(jdbcTemplate, Tag.class);
-    }
-
-    @Override
-    public List<Tag> findAll() {
-        return executeSelectQuery(FIND_ALL_SQL);
-    }
-
-    @Override
-    public Optional<Tag> findById(Long id) {
-        return executeIdentifiableSelectQuery(FIND_BY_ID_SQL, id);
-    }
-
-    @Override
-    public void create(Tag entity) {
-        Long generatedId = executeInsertQueryReturnGeneratedKey(entity, Long.class);
-        entity.setId(generatedId);
-    }
-
-    @Override
-    public boolean update(Tag entity) {
-        throw new UnsupportedOperationException("update for Tags is not implemented");
-    }
-
-    @Override
-    public boolean delete(Long id) {
-        return executeDeleteQuery(id);
+    public TagDaoImpl(EntityManager entityManager) {
+        super(Tag.class, entityManager);
     }
 
     @Override
     public Optional<Tag> findByName(String name) {
-        return executeIdentifiableSelectQuery(FIND_BY_NAME_SQL, name);
+        return entityManager.createQuery(
+                        "SELECT t FROM Tag t WHERE t.name = :name", Tag.class)
+                .setParameter("name", name)
+                .getResultStream()
+                .findFirst();
     }
 
     @Override
-    public List<Tag> findByGiftCertificateId(Long id) {
-        return executeSelectQuery(FIND_BY_CERTIFICATE_ID_SQL, id);
+    public Tag createIfNotExists(Tag tag) {
+        Optional<Tag> maybeTag = findByName(tag.getName());
+        return maybeTag.orElseGet(() -> create(tag));
     }
 
     @Override
-    protected String getTableName() {
-        return TABLE_NAME;
+    @SuppressWarnings("unchecked")
+    public Optional<Tag> findTopTagOfUserWithTheHighestCostOfAllOrders() {
+        return entityManager.createNativeQuery(TOP_TAG_SQL, Tag.class)
+                .getResultStream()
+                .findFirst();
     }
 
     @Override
-    protected String getIdColumnName() {
-        return ID_COLUMN_NAME;
+    protected void setNotNullFieldsToManagedEntity(Tag managedEntity, Tag newEntity) {
+        var name = Optional.ofNullable(newEntity.getName());
+        var certificates = newEntity.getGiftCertificates();
+        name.ifPresent(managedEntity::setName);
+        managedEntity.getGiftCertificates().addAll(certificates);
     }
 }

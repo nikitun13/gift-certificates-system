@@ -2,32 +2,43 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.GiftCertificateFilters;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.mapper.Mapper;
-import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.service.ServiceTestConfig;
+import com.epam.esm.mapper.GiftCertificateMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 
-@ContextConfiguration(classes = ServiceTestConfig.class)
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class GiftCertificateServiceImplTest {
 
-    private final GiftCertificateDao dao;
-    private final GiftCertificateService service;
+    @InjectMocks
+    private GiftCertificateServiceImpl service;
 
+    @Mock
+    private GiftCertificateDao dao;
+
+    @Mock
+    private GiftCertificateMapper mapper;
 
     private GiftCertificate cocaColaCertificate;
     private GiftCertificate kfcCertificate;
@@ -36,14 +47,6 @@ class GiftCertificateServiceImplTest {
     private GiftCertificateDto cocaColaCertificateDto;
     private GiftCertificateDto kfcCertificateDto;
     private GiftCertificateDto oneHundredDollarsCertificateDto;
-
-    @Autowired
-    GiftCertificateServiceImplTest(GiftCertificateDao dao,
-                                   Mapper<GiftCertificate, GiftCertificateDto> giftCertificateDtoMapper,
-                                   Mapper<GiftCertificate, UpdateGiftCertificateDto> updateGiftCertificateDtoMapper) {
-        this.dao = dao;
-        service = new GiftCertificateServiceImpl(dao, giftCertificateDtoMapper, updateGiftCertificateDtoMapper);
-    }
 
     @BeforeEach
     void init() {
@@ -113,163 +116,137 @@ class GiftCertificateServiceImplTest {
 
     @Test
     @Tag("findAll")
-    void shouldFindAllEntitiesAndMapThemToDtos() {
-        List<GiftCertificate> daoReturn = List.of(cocaColaCertificate, kfcCertificate, oneHundredDollarsCertificate);
-        Mockito.doReturn(daoReturn)
+    void shouldDelegateToDaoAndResultToMapper() {
+        GiftCertificateFilters filters = new GiftCertificateFilters(
+                List.of("extreme", "rest"), "cerf", "adc", List.of("-name", "createDate"));
+        Pageable pageable = PageRequest.of(0, 20);
+        doReturn(cocaColaCertificateDto)
+                .when(mapper)
+                .toGiftCertificateDto(cocaColaCertificate);
+        doReturn(kfcCertificateDto)
+                .when(mapper)
+                .toGiftCertificateDto(kfcCertificate);
+        doReturn(oneHundredDollarsCertificateDto)
+                .when(mapper)
+                .toGiftCertificateDto(oneHundredDollarsCertificate);
+        List<GiftCertificate> list = List.of(cocaColaCertificate, kfcCertificate, oneHundredDollarsCertificate);
+        Page<GiftCertificate> page = new PageImpl<>(list, pageable, list.size());
+        doReturn(page)
                 .when(dao)
-                .findAll();
-        List<GiftCertificateDto> expected = List.of(
-                cocaColaCertificateDto,
-                kfcCertificateDto,
-                oneHundredDollarsCertificateDto);
+                .findAll(filters, pageable);
+        List<GiftCertificateDto> content = List.of(cocaColaCertificateDto, kfcCertificateDto, oneHundredDollarsCertificateDto);
+        Page<GiftCertificateDto> expected = new PageImpl<>(content, pageable, content.size());
 
-        List<GiftCertificateDto> actual = service.findAll();
+        Page<GiftCertificateDto> actual = service.findAll(filters, pageable);
 
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     @Tag("findById")
-    void shouldFindEntityByIdAndMapItToDto() {
-        Mockito.doReturn(Optional.of(oneHundredDollarsCertificate))
+    void shouldDelegateFindByIdToDaoAndResultToMapper() {
+        Long id = kfcCertificate.getId();
+        doReturn(Optional.of(kfcCertificate))
                 .when(dao)
-                .findById(oneHundredDollarsCertificate.getId());
-        Optional<GiftCertificateDto> expected = Optional.of(oneHundredDollarsCertificateDto);
+                .findById(id);
+        doReturn(kfcCertificateDto)
+                .when(mapper)
+                .toGiftCertificateDto(kfcCertificate);
+        Optional<GiftCertificateDto> expected = Optional.of(kfcCertificateDto);
 
-        Optional<GiftCertificateDto> actual = service.findById(oneHundredDollarsCertificate.getId());
+        Optional<GiftCertificateDto> actual = service.findById(id);
 
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
-    @Tag("findById")
-    void shouldReturnEmptyOptionalIfNoSuchEntityWithTheGivenId() {
-        Long noSuchId = 10000L;
-        Mockito.doReturn(Optional.empty())
+    @Tag("update")
+    void shouldDelegateToMapperThenSetIdAndResultDelegateToDaoUpdate() {
+        Long id = oneHundredDollarsCertificate.getId();
+        String newName = "new name";
+        Long newPrice = 555L;
+        Integer newDuration = 11;
+        UpdateGiftCertificateDto dto = new UpdateGiftCertificateDto(newName, null, newPrice, newDuration, null);
+        GiftCertificate certificateWithoutId = GiftCertificate.builder()
+                .name(newName)
+                .price(newPrice)
+                .duration(newDuration)
+                .build();
+        doReturn(certificateWithoutId)
+                .when(mapper)
+                .toGiftCertificate(dto);
+        GiftCertificate certificate = GiftCertificate.builder()
+                .id(id)
+                .name(newName)
+                .price(newPrice)
+                .duration(newDuration)
+                .build();
+        doReturn(true)
                 .when(dao)
-                .findById(noSuchId);
-        Optional<GiftCertificateDto> expected = Optional.empty();
+                .update(certificate);
 
-        Optional<GiftCertificateDto> actual = service.findById(noSuchId);
+        boolean actual = service.update(dto, id);
 
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @Tag("delete")
+    void shouldDelegateDeleteToDao() {
+        Long id = cocaColaCertificate.getId();
+        doReturn(true)
+                .when(dao)
+                .delete(id);
+
+        boolean actual = service.delete(id);
+
+        assertThat(actual).isTrue();
     }
 
     @Test
     @Tag("create")
-    void shouldReturnCreatedEntityWithId() {
-        UpdateGiftCertificateDto createNewCocaColaCertificateDto = new UpdateGiftCertificateDto(
-                cocaColaCertificateDto.name(),
-                cocaColaCertificateDto.description(),
-                cocaColaCertificateDto.price(),
-                cocaColaCertificateDto.duration(),
-                new ArrayList<>());
-        cocaColaCertificate.setId(null);
-        Mockito.doAnswer(invocation -> {
-                    GiftCertificate certificate = invocation.getArgument(0, GiftCertificate.class);
-                    certificate.setId(cocaColaCertificateDto.id());
-                    return null;
-                })
+    void shouldDelegateToMapperThanCreateToDaoAndToMapperAgain() {
+        String name = "new name";
+        Long price = 555L;
+        Integer duration = 11;
+        String description = "description";
+        UpdateGiftCertificateDto dto = new UpdateGiftCertificateDto(name, description, price, duration, Collections.emptyList());
+        GiftCertificate certificate = GiftCertificate.builder()
+                .name(name)
+                .description(description)
+                .price(price)
+                .duration(duration)
+                .build();
+        doReturn(certificate)
+                .when(mapper)
+                .toGiftCertificate(dto);
+        Long id = 10L;
+        LocalDateTime now = LocalDateTime.now();
+        GiftCertificate fullCertificate = GiftCertificate.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .price(price)
+                .createDate(now)
+                .lastUpdateDate(now)
+                .duration(duration)
+                .build();
+        doAnswer(invocation -> {
+            GiftCertificate arg = invocation.getArgument(0);
+            arg.setId(id);
+            arg.setCreateDate(now);
+            arg.setLastUpdateDate(now);
+            return arg;
+        })
                 .when(dao)
-                .create(Mockito.any());
+                .create(certificate);
+        GiftCertificateDto expected = new GiftCertificateDto(id, name, description, price, duration, now, now, Collections.emptyList());
+        doReturn(expected)
+                .when(mapper)
+                .toGiftCertificateDto(fullCertificate);
 
-        GiftCertificateDto actual = service.create(createNewCocaColaCertificateDto);
-
-        assertThat(actual.id()).isEqualTo(cocaColaCertificateDto.id());
-        assertThat(actual.createDate()).isNotNull();
-        assertThat(actual.lastUpdateDate()).isNotNull();
-    }
-
-    @Test
-    @Tag("delete")
-    void shouldDelegateToDaoAndReturnTrue() {
-        Long id = cocaColaCertificate.getId();
-        Mockito.doReturn(Boolean.TRUE)
-                .when(dao)
-                .delete(id);
-
-        boolean actual = service.delete(id);
-
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    @Tag("delete")
-    void shouldDelegateToDaoAndReturnFalse() {
-        Long id = 50000L;
-        Mockito.doReturn(Boolean.FALSE)
-                .when(dao)
-                .delete(id);
-
-        boolean actual = service.delete(id);
-
-        assertThat(actual).isFalse();
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFilterUnknownCertificateParams() {
-        Map<String, String> dummyTagProperties = Collections.emptyMap();
-        List<String> dummyOrderBy = Collections.emptyList();
-        String dummyValue = "dummy";
-        Map<String, String> params = Map.of(
-                "names", dummyValue,
-                "ide~", dummyValue,
-                "descriptionl~", dummyValue,
-                "money>", dummyValue,
-                "432t3", dummyValue,
-                "<><><>", dummyValue,
-                "~", dummyValue,
-                "", dummyValue,
-                "a", dummyValue,
-                "createDate", dummyValue
-        );
-        Map<String, String> expectedDaoParams = Map.of("createDate", dummyValue);
-        Mockito.doReturn(List.of(oneHundredDollarsCertificate))
-                .when(dao)
-                .findByParams(expectedDaoParams, dummyTagProperties, dummyOrderBy);
-        List<GiftCertificateDto> expected = List.of(oneHundredDollarsCertificateDto);
-
-        List<GiftCertificateDto> actual = service.findByParams(params, dummyTagProperties, dummyOrderBy);
+        GiftCertificateDto actual = service.create(dto);
 
         assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    @Tag("findByParams")
-    void shouldFindAllIfNoFiltersPresent() {
-        Map<String, String> emptyParams = Collections.emptyMap();
-        Map<String, String> emptyTagProperties = Collections.emptyMap();
-        List<String> emptyOrderBy = Collections.emptyList();
-
-        List<GiftCertificate> daoReturn = List.of(cocaColaCertificate, kfcCertificate, oneHundredDollarsCertificate);
-        Mockito.doReturn(daoReturn)
-                .when(dao)
-                .findByParams(emptyParams, emptyTagProperties, emptyOrderBy);
-        List<GiftCertificateDto> expected = List.of(
-                cocaColaCertificateDto,
-                kfcCertificateDto,
-                oneHundredDollarsCertificateDto);
-
-        List<GiftCertificateDto> actual = service.findByParams(emptyParams, emptyTagProperties, emptyOrderBy);
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    void shouldMapToEntityAndDelegateToDto() {
-        Long id = kfcCertificateDto.id();
-        String newDescription = "New description";
-        UpdateGiftCertificateDto updateKfcCertificate = new UpdateGiftCertificateDto(
-                null, newDescription, null, null, null);
-        Mockito.doReturn(Boolean.TRUE)
-                .when(dao)
-                .update(Mockito.argThat(argument -> argument.getId().equals(id)
-                        && argument.getDescription().equals(newDescription)
-                        && argument.getLastUpdateDate() != null));
-
-        boolean actual = service.update(updateKfcCertificate, id);
-
-        assertThat(actual).isTrue();
     }
 }

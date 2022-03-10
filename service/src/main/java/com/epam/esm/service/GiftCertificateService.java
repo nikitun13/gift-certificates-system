@@ -1,10 +1,11 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.dto.GiftCertificateFilters;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -14,12 +15,14 @@ import java.util.Optional;
 public interface GiftCertificateService {
 
     /**
-     * Finds all entities from the storage and maps them
-     * to {@link GiftCertificateDto}.
+     * Finds all entities from the storage, filters them by the given params
+     * and maps them to {@link GiftCertificateDto}.
      *
-     * @return list of all {@code GiftCertificateDtos}.
+     * @param filters  filtering args.
+     * @param pageable pagination information.
+     * @return list of {@code GiftCertificateDtos}.
      */
-    List<GiftCertificateDto> findAll();
+    Page<GiftCertificateDto> findAll(GiftCertificateFilters filters, Pageable pageable);
 
     /**
      * Finds entity by id and maps it to {@link GiftCertificateDto}.
@@ -59,18 +62,4 @@ public interface GiftCertificateService {
      * @return created entity that mapped to {@link GiftCertificateDto}.
      */
     GiftCertificateDto create(UpdateGiftCertificateDto createGiftCertificateDto);
-
-    /**
-     * Finds entities by different params including {@code Tag} params
-     * and orders by the given fields. Unknown params in the
-     * list of parameters will be ignored.
-     *
-     * @param params        filtering properties of the {@code certificate} (unknown properties will be ignored).
-     * @param tagProperties filtering properties of the {@code tag}.
-     * @param orderBy       list of the ordering by fields.
-     * @return list of the dtos that satisfy all the filters.
-     */
-    List<GiftCertificateDto> findByParams(Map<String, String> params,
-                                          Map<String, String> tagProperties,
-                                          List<String> orderBy);
 }

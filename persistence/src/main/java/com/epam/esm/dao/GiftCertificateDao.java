@@ -1,9 +1,9 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.dto.GiftCertificateFilters;
 import com.epam.esm.entity.GiftCertificate;
-
-import java.util.List;
-import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface {@code GiftCertificateDao} is an interface that extends {@link BaseDao}
@@ -15,15 +15,12 @@ import java.util.Map;
 public interface GiftCertificateDao extends BaseDao<Long, GiftCertificate> {
 
     /**
-     * Finds entities by different params including {@code Tag} params
-     * and orders by the given fields.
+     * Returns all {@code entities} from the repository
+     * on the current page that matches filers.
      *
-     * @param certificateProperties filtering properties of the {@code certificate}.
-     * @param tagProperties         filtering properties of the {@code tag}.
-     * @param orderBy               list of the ordering by fields.
-     * @return list of the entities that satisfy all the filters.
+     * @param filters  filtering args.
+     * @param pageable pagination information.
+     * @return list of the all {@code entities} from the repository.
      */
-    List<GiftCertificate> findByParams(Map<String, String> certificateProperties,
-                                       Map<String, String> tagProperties,
-                                       List<String> orderBy);
+    Page<GiftCertificate> findAll(GiftCertificateFilters filters, Pageable pageable);
 }

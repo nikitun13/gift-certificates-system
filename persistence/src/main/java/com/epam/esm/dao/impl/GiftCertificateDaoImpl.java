@@ -1,144 +1,198 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.dao.SqlRequestParamParser;
+import com.epam.esm.dao.TagDao;
+import com.epam.esm.dto.GiftCertificateFilters;
 import com.epam.esm.entity.GiftCertificate;
-import org.apache.commons.lang3.ArrayUtils;
+import com.epam.esm.entity.Tag;
+import com.epam.esm.util.JpaUtil;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.AbstractQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
 
 @Repository
-public class GiftCertificateDaoImpl extends AbstractDao<GiftCertificate> implements GiftCertificateDao {
+public class GiftCertificateDaoImpl extends AbstractDao<Long, GiftCertificate> implements GiftCertificateDao {
 
-    private static final Logger log = LoggerFactory.getLogger(GiftCertificateDaoImpl.class);
+    private static final String NAME_ATTRIBUTE = "name";
+    private static final String DESCRIPTION_ATTRIBUTE = "description";
+    private static final String TAGS_ATTRIBUTE = "tags";
 
-    private static final String TABLE_NAME = "gift_certificate";
-    private static final String ID_COLUMN_NAME = "id";
+    private final TagDao tagDao;
+    private final JpaUtil jpaUtil;
 
-    private static final String GIFT_CERTIFICATE_PREFIX_FORMAT = "gift_certificate.%s";
-    private static final String TAG_PREFIX_FORMAT = "tag.%s";
-
-    private static final String FIND_ALL_SQL = """
-            SELECT id, name, description, price, duration, create_date, last_update_date
-            FROM gift_certificate""";
-    private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + " WHERE id = ?";
-    private static final String SELECT_WITH_PARAMS_SQL = """
-            SELECT gift_certificate.id,
-                   gift_certificate.name,
-                   gift_certificate.description,
-                   gift_certificate.price,
-                   gift_certificate.duration,
-                   gift_certificate.create_date,
-                   gift_certificate.last_update_date
-            FROM gift_certificate""";
-    private static final String JOIN_TAG_SQL = """
-             JOIN gift_certificate_tag gct ON gift_certificate.id = gct.gift_certificate_id
-            JOIN tag ON tag.id = gct.tag_id""";
-
-    private final SqlRequestParamParser parser;
-
-    @Autowired
-    public GiftCertificateDaoImpl(JdbcTemplate jdbcTemplate, SqlRequestParamParser parser) {
-        super(jdbcTemplate, GiftCertificate.class);
-        this.parser = parser;
+    public GiftCertificateDaoImpl(EntityManager entityManager, TagDao tagDao, JpaUtil jpaUtil) {
+        super(GiftCertificate.class, entityManager);
+        this.tagDao = tagDao;
+        this.jpaUtil = jpaUtil;
     }
 
     @Override
-    public List<GiftCertificate> findAll() {
-        return executeSelectQuery(FIND_ALL_SQL);
+    protected void setNotNullFieldsToManagedEntity(GiftCertificate managedEntity, GiftCertificate newEntity) {
+        newEntity.getTags().stream()
+                .map(tagDao::createIfNotExists)
+                .forEach(managedEntity::addTag);
+        var name = Optional.ofNullable(newEntity.getName());
+        var description = Optional.ofNullable(newEntity.getDescription());
+        var price = Optional.ofNullable(newEntity.getPrice());
+        var duration = Optional.ofNullable(newEntity.getDuration());
+        var createDate = Optional.ofNullable(newEntity.getCreateDate());
+        var lastUpdateDate = Optional.ofNullable(newEntity.getLastUpdateDate());
+
+        name.ifPresent(managedEntity::setName);
+        description.ifPresent(managedEntity::setDescription);
+        price.ifPresent(managedEntity::setPrice);
+        duration.ifPresent(managedEntity::setDuration);
+        createDate.ifPresent(managedEntity::setCreateDate);
+        lastUpdateDate.ifPresent(managedEntity::setLastUpdateDate);
     }
 
     @Override
-    public Optional<GiftCertificate> findById(Long id) {
-        return executeIdentifiableSelectQuery(FIND_BY_ID_SQL, id);
+    public GiftCertificate create(GiftCertificate entity) {
+        List<Tag> tags = entity.getTags().stream()
+                .map(tagDao::createIfNotExists)
+                .toList();
+        entity.setTags(tags);
+        return super.create(entity);
     }
 
     @Override
-    public void create(GiftCertificate entity) {
-        Long generatedId = executeInsertQueryReturnGeneratedKey(entity, Long.class);
-        entity.setId(generatedId);
+    public Page<GiftCertificate> findAll(GiftCertificateFilters filters, Pageable pageable) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteria = cb.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> giftCertificate = criteria.from(GiftCertificate.class);
+        Optional<Predicate[]> maybePredicates = buildPredicates(cb, giftCertificate, filters, criteria);
+        Optional<Order[]> maybeOrders = buildOrders(cb, giftCertificate, filters.orderBy());
+
+        criteria.select(giftCertificate);
+        maybePredicates.ifPresent(criteria::where);
+        maybeOrders.ifPresent(criteria::orderBy);
+
+        int offset = (int) pageable.getOffset();
+        int pageSize = pageable.getPageSize();
+        List<GiftCertificate> content = entityManager.createQuery(criteria)
+                .setFirstResult(offset)
+                .setMaxResults(pageSize)
+                .getResultList();
+        long total = countTotalByFilters(filters, cb);
+
+        return new PageImpl<>(content, pageable, total);
     }
 
-    @Override
-    public boolean update(GiftCertificate entity) {
-        return executeUpdateQuery(entity);
+    /**
+     * Counts total rows the given filters.
+     */
+    private long countTotalByFilters(GiftCertificateFilters filters, CriteriaBuilder cb) {
+        CriteriaQuery<Long> criteria = cb.createQuery(Long.class);
+        Root<GiftCertificate> giftCertificate = criteria.from(GiftCertificate.class);
+        Subquery<GiftCertificate> subquery = criteria.subquery(GiftCertificate.class);
+        Root<GiftCertificate> giftCertificateSubquery = subquery.from(GiftCertificate.class);
+        Optional<Predicate[]> maybePredicates = buildPredicates(
+                cb, giftCertificateSubquery, filters, subquery);
+
+        maybePredicates.ifPresent(subquery::where);
+
+        criteria.select(cb.count(giftCertificate))
+                .where(giftCertificate.in(
+                        subquery.select(giftCertificateSubquery)
+                ));
+        return entityManager.createQuery(criteria)
+                .getSingleResult();
     }
 
-    @Override
-    public boolean delete(Long id) {
-        return executeDeleteQuery(id);
-    }
+    /**
+     * Builds array of Predicates for filtering GiftCertificates.
+     * Filtering args contain in {@link GiftCertificateFilters}.
+     * All the arguments are optional, but if present, then filter by the following conditions (join by AND condition):
+     * <ul>
+     *     <li>by several tag names (AND condition)</li>
+     *     <li>by part of the gift certificate name</li>
+     *     <li>by part of the description</li>
+     * </ul>
+     */
+    private Optional<Predicate[]> buildPredicates(CriteriaBuilder cb,
+                                                  Root<GiftCertificate> giftCertificate,
+                                                  GiftCertificateFilters filters,
+                                                  AbstractQuery<GiftCertificate> criteria) {
+        String name = filters.name();
+        String description = filters.description();
+        List<String> tags = Optional.ofNullable(filters.tags())
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(ObjectUtils::isNotEmpty)
+                .distinct()
+                .toList(); // filter empty and repeating tag names
 
-    @Override
-    protected String getTableName() {
-        return TABLE_NAME;
-    }
-
-    @Override
-    protected String getIdColumnName() {
-        return ID_COLUMN_NAME;
-    }
-
-    @Override
-    public List<GiftCertificate> findByParams(Map<String, String> certificateProperties,
-                                              Map<String, String> tagProperties,
-                                              List<String> orderBy) {
-        StringBuilder builder = new StringBuilder(SELECT_WITH_PARAMS_SQL);
-        Object[] args = null;
-        if (ObjectUtils.isNotEmpty(certificateProperties) || ObjectUtils.isNotEmpty(tagProperties)) {
-            if (ObjectUtils.isNotEmpty(tagProperties)) {
-                builder.append(JOIN_TAG_SQL);
-            }
-            Stream<Pair<String, String>> certificatePropertiesStream = certificateProperties.entrySet().stream()
-                    .map(entry -> Pair.of(
-                            GIFT_CERTIFICATE_PREFIX_FORMAT.formatted(entry.getKey()),
-                            entry.getValue()
-                    ));
-            Stream<Pair<String, String>> tagPropertiesStream = tagProperties.entrySet().stream()
-                    .map(entry -> Pair.of(
-                            TAG_PREFIX_FORMAT.formatted(entry.getKey()),
-                            entry.getValue()
-                    ));
-
-            Map<String, String> filteringParams = Stream.concat(certificatePropertiesStream, tagPropertiesStream)
-                    .collect(toMap(Pair::getLeft,
-                            pair -> pair.getLeft().endsWith("~")
-                                    ? wrapWithPercentages(pair.getRight())
-                                    : pair.getRight()));
-
-            String whereSql = filteringParams.keySet().stream()
-                    .map(this::camelToSnakeCase)
-                    .map(parser::toFormattedSqlString)
-                    .collect(joining(AND_SQL, WHERE_SQL, ""));
-            args = filteringParams.values().toArray();
-            builder.append(whereSql);
+        List<Predicate> predicates = new ArrayList<>();
+        if (ObjectUtils.isNotEmpty(name)) {
+            String wrappedString = jpaUtil.wrapWithPercentages(name);
+            // Predicate that equal to the following sql query: gift_certificate.name like %name%
+            Predicate predicate = cb.like(giftCertificate.get(NAME_ATTRIBUTE), wrappedString);
+            predicates.add(predicate);
+        }
+        if (ObjectUtils.isNotEmpty(description)) {
+            String wrappedString = jpaUtil.wrapWithPercentages(description);
+            // Predicate that equal to the following sql query: gift_certificate.description like %description%
+            Predicate predicate = cb.like(giftCertificate.get(DESCRIPTION_ATTRIBUTE), wrappedString);
+            predicates.add(predicate);
         }
 
-        if (ObjectUtils.isNotEmpty(orderBy)) {
-            String orderBySql = orderBy.stream()
-                    .map(this::camelToSnakeCase)
-                    .map(this::createOrderingSqlString)
-                    .collect(joining(COMMA_DELIMITER, ORDER_BY_SQL, ""));
-            builder.append(orderBySql);
+        // To find by several tags (AND condition), we should use the following filter:
+        //
+        // WHERE (tag.name = tagName1 OR tag.name = tagName2 OR ...)
+        // GROUP BY gift_certificate.id
+        // HAVING count(t.id) = tagsSize;
+        //
+        // tagsSize - number of tag names that are listed in the WHERE.
+        // In case that we find certificates by tag names with OR condition,
+        // we group certificates by id, so we can count number of rows with that certificate.
+        // The number of the rows with grouped certificate is a number of its tags that satisfy WHERE filters.
+        // So we filter certificates in the HAVING that count number is not equal to tagsSize.
+        if (ObjectUtils.isNotEmpty(tags)) {
+            Join<GiftCertificate, Tag> tag = giftCertificate.join(TAGS_ATTRIBUTE);
+            Path<String> tagNameAttr = tag.get(NAME_ATTRIBUTE);
+            criteria.groupBy(giftCertificate)                       // GROUP BY gift_certificate.id
+                    .having(cb.equal(cb.count(tag), tags.size()));  // HAVING count(t.id) = tagsSize;
+            tags.stream()
+                    .map(tagName -> cb.equal(tagNameAttr, tagName)) // Predicate: tag.name = tagName
+                    .reduce(cb::or)                                 // Collect to one Predicate with OR condition
+                    .ifPresent(predicates::add);
         }
+        return predicates.isEmpty()
+                ? Optional.empty()
+                : Optional.of(predicates.toArray(Predicate[]::new));
+    }
 
-        String sql = builder.toString();
-        log.debug("Built sql: {}", sql);
-        String argsToString = ArrayUtils.toString(args);
-        log.debug("Filtering args: {}", argsToString);
-        return jdbcTemplate.query(sql, rowMapper, args);
+    /**
+     * Builds array of Orders for ordering GiftCertificates.
+     */
+    private Optional<Order[]> buildOrders(CriteriaBuilder cb,
+                                          Root<GiftCertificate> giftCertificate,
+                                          List<String> orderBy) {
+        Order[] orders = Optional.ofNullable(orderBy)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(ObjectUtils::isNotEmpty)
+                .map(field -> jpaUtil.createOrder(cb, giftCertificate, field)) // creates ordering by the given field
+                .toArray(Order[]::new);                                        // e.g. field ASC or field DESC
+        return ObjectUtils.isNotEmpty(orders)                                  // Asc or desc depends on '-' sign
+                ? Optional.of(orders)                                          // at the beginning of the field name.
+                : Optional.empty();
     }
 }

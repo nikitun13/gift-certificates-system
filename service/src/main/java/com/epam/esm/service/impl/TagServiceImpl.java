@@ -2,45 +2,39 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.CreateTagDto;
-import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.mapper.Mapper;
+import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class TagServiceImpl implements TagService {
 
     private final TagDao tagDao;
-    private final Mapper<Tag, TagDto> tagDtoMapper;
-    private final Mapper<Tag, CreateTagDto> createTagDtoMapper;
+    private final TagMapper tagMapper;
 
-    @Autowired
-    public TagServiceImpl(TagDao tagDao,
-                          Mapper<Tag, TagDto> tagDtoMapper,
-                          Mapper<Tag, CreateTagDto> createTagDtoMapper) {
+    public TagServiceImpl(TagDao tagDao, TagMapper tagMapper) {
         this.tagDao = tagDao;
-        this.tagDtoMapper = tagDtoMapper;
-        this.createTagDtoMapper = createTagDtoMapper;
+        this.tagMapper = tagMapper;
     }
 
     @Override
-    public List<TagDto> findAll() {
-        return tagDao.findAll()
-                .stream()
-                .map(tagDtoMapper::mapToDto)
-                .toList();
+    public Page<TagDto> findAll(Pageable pageable) {
+        return tagDao.findAll(pageable)
+                .map(tagMapper::toTagDto);
     }
 
     @Override
     public Optional<TagDto> findById(Long id) {
         return tagDao.findById(id)
-                .map(tagDtoMapper::mapToDto);
+                .map(tagMapper::toTagDto);
     }
 
     @Override
@@ -50,28 +44,20 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public TagDto create(CreateTagDto createTagDto) {
-        Tag entity = createTagDtoMapper.mapToEntity(createTagDto);
+        Tag entity = tagMapper.toTag(createTagDto);
         tagDao.create(entity);
-        return tagDtoMapper.mapToDto(entity);
-    }
-
-    @Override
-    public TagDto createIfNotExists(CreateTagDto createTagDto) {
-        Optional<TagDto> maybeTag = findByName(createTagDto.name());
-        return maybeTag.orElseGet(() -> create(createTagDto));
+        return tagMapper.toTagDto(entity);
     }
 
     @Override
     public Optional<TagDto> findByName(String name) {
         return tagDao.findByName(name)
-                .map(tagDtoMapper::mapToDto);
+                .map(tagMapper::toTagDto);
     }
 
     @Override
-    public List<TagDto> findByGiftCertificate(GiftCertificateDto giftCertificateDto) {
-        return tagDao.findByGiftCertificateId(giftCertificateDto.id())
-                .stream()
-                .map(tagDtoMapper::mapToDto)
-                .toList();
+    public Optional<TagDto> findTopTagOfUserWithTheHighestCostOfAllOrders() {
+        return tagDao.findTopTagOfUserWithTheHighestCostOfAllOrders()
+                .map(tagMapper::toTagDto);
     }
 }
