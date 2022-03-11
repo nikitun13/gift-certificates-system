@@ -3,6 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.Optional;
 
@@ -10,7 +11,7 @@ import java.util.Optional;
  * Describes interface of the service that provides
  * CRUD operations with {@code User} entities.
  */
-public interface UserService {
+public interface UserService extends UserDetailsService {
 
     /**
      * Finds entities from the storage on the given page
