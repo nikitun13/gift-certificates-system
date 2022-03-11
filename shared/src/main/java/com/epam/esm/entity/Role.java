@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-public class Role {
+public class Role implements BaseEntity<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,10 +38,12 @@ public class Role {
         this.name = name;
     }
 
-    public void setId(int id) {
+    @Override
+    public void setId(Integer id) {
         this.id = id;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }

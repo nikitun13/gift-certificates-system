@@ -1,6 +1,13 @@
 package com.epam.esm.entity;
 
-public enum UserRole {
+import org.springframework.security.core.GrantedAuthority;
+
+public enum UserRole implements GrantedAuthority {
     CLIENT,
-    ADMIN
+    ADMIN;
+
+    @Override
+    public String getAuthority() {
+        return name();
+    }
 }
