@@ -1,5 +1,8 @@
 package com.epam.esm.entity;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,13 +15,18 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Table(name = "users")
-public class User implements BaseEntity<Long> {
+public class User implements BaseEntity<Long>, UserDetails {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +51,7 @@ public class User implements BaseEntity<Long> {
 
     @OneToMany(mappedBy = "user",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
-    private List<Order> orders = new ArrayList<>();
+    private transient List<Order> orders = new ArrayList<>();
 
     public User() {
     }
@@ -95,8 +103,29 @@ public class User implements BaseEntity<Long> {
         this.username = username;
     }
 
+    @Override
     public String getUsername() {
         return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public List<Order> getOrders() {
@@ -107,6 +136,14 @@ public class User implements BaseEntity<Long> {
         this.orders = orders;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(Role::getName)
+                .toList();
+    }
+
+    @Override
     public String getPassword() {
         return password;
     }
