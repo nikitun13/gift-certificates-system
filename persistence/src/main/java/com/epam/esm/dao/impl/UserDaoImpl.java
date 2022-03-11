@@ -22,4 +22,12 @@ public class UserDaoImpl extends AbstractDao<Long, User> implements UserDao {
 
         username.ifPresent(managedEntity::setUsername);
     }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                .setParameter("username", username)
+                .getResultStream()
+                .findFirst();
+    }
 }
