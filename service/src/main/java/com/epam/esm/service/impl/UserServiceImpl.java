@@ -2,6 +2,9 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.UserDto;
+import com.epam.esm.entity.Role;
+import com.epam.esm.entity.User;
+import com.epam.esm.entity.UserRole;
 import com.epam.esm.mapper.UserMapper;
 import com.epam.esm.service.UserService;
 import org.springframework.data.domain.Page;
@@ -11,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -40,6 +44,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return dao.findByUsername(username)
+                .map(this::buildUserDetails)
                 .orElseThrow(() -> new UsernameNotFoundException("No such user with the username: " + username));
+    }
+
+    private UserDetails buildUserDetails(User user) {
+        List<UserRole> authorities = user.getRoles().stream()
+                .map(Role::getName)
+                .toList();
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                authorities
+        );
     }
 }
