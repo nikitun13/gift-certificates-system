@@ -6,8 +6,12 @@ public enum Role implements GrantedAuthority {
     CLIENT,
     ADMIN;
 
+    private static final String ROLE_PREFIX = "ROLE_";
+
+    private final String authority = ROLE_PREFIX + name();
+
     @Override
     public String getAuthority() {
-        return name();
+        return authority;
     }
 }
