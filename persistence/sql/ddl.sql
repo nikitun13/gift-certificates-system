@@ -42,7 +42,7 @@ CREATE TABLE role
     name VARCHAR(128) NOT NULL UNIQUE
 );
 
-CREATE TABLE user_role
+CREATE TABLE users_role
 (
     user_id BIGINT REFERENCES users (id),
     role_id INTEGER REFERENCES role (id),
