@@ -18,6 +18,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/certificates", produces = MediaType.APPLICATION_JSON_VALUE)
+@PreAuthorize("isAuthenticated()")
 public class GiftCertificateController {
 
     private final GiftCertificateService giftCertificateService;
@@ -49,6 +51,7 @@ public class GiftCertificateController {
     }
 
     @GetMapping
+    @PreAuthorize("permitAll()")
     public CollectionModel<?> findAll(GiftCertificateFilters filters,
                                       Pageable pageable) {
         Page<?> page = giftCertificateService.findAll(filters, pageable)
@@ -63,6 +66,7 @@ public class GiftCertificateController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     public RepresentationModel<?> findById(@PathVariable("id") Long id) {
         GiftCertificateDto dto = giftCertificateService.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(id));
@@ -70,6 +74,7 @@ public class GiftCertificateController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole(T(com.epam.esm.entity.Role).ADMIN)")
     public ResponseEntity<Void> create(
             @Validated({CreateGiftCertificateConstraintsGroup.class, GeneralConstraintsGroup.class})
             @RequestBody UpdateGiftCertificateDto createDto) {
@@ -79,6 +84,7 @@ public class GiftCertificateController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole(T(com.epam.esm.entity.Role).ADMIN)")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         boolean isDeleted = giftCertificateService.delete(id);
         if (isDeleted) {
@@ -88,6 +94,7 @@ public class GiftCertificateController {
     }
 
     @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole(T(com.epam.esm.entity.Role).ADMIN)")
     public ResponseEntity<Void> update(@Validated(GeneralConstraintsGroup.class)
                                        @RequestBody UpdateGiftCertificateDto updateDto,
                                        @PathVariable("id") Long id) {
