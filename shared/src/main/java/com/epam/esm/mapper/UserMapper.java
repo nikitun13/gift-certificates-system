@@ -1,6 +1,7 @@
 package com.epam.esm.mapper;
 
 import com.epam.esm.dto.CreateUserDto;
+import com.epam.esm.dto.UserDetailsDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.User;
 import org.mapstruct.Mapper;
@@ -14,4 +15,6 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "orders", ignore = true)
     User toUser(CreateUserDto createUserDto);
+
+    UserDetailsDto toUserDetailsDto(User user);
 }
