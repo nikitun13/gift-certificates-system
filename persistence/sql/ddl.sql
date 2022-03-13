@@ -33,20 +33,8 @@ CREATE TABLE users
     username   VARCHAR(128) NOT NULL UNIQUE,
     password   CHAR(60)     NOT NULL,
     first_name VARCHAR(256) NOT NULL,
-    last_name  VARCHAR(256) NOT NULL
-);
-
-CREATE TABLE role
-(
-    id   SERIAL PRIMARY KEY,
-    name VARCHAR(128) NOT NULL UNIQUE
-);
-
-CREATE TABLE users_role
-(
-    user_id BIGINT REFERENCES users (id),
-    role_id INTEGER REFERENCES role (id),
-    PRIMARY KEY (user_id, role_id)
+    last_name  VARCHAR(256) NOT NULL,
+    role       VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE orders

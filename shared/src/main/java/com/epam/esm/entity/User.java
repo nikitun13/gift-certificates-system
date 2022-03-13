@@ -3,12 +3,11 @@ package com.epam.esm.entity;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.ArrayList;
@@ -35,11 +34,9 @@ public class User implements BaseEntity<Long> {
     @Column(nullable = false)
     private String lastName;
 
-    @ManyToMany
-    @JoinTable(name = "users_role",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private List<Role> roles = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     @OneToMany(mappedBy = "user",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
@@ -48,14 +45,12 @@ public class User implements BaseEntity<Long> {
     public User() {
     }
 
-    public User(Long id, String username, String password, String firstName, String lastName,
-                List<Role> roles, List<Order> orders) {
+    public User(Long id, String username, String password, String firstName, String lastName, List<Order> orders) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.roles = roles;
         this.orders = orders;
     }
 
@@ -74,11 +69,6 @@ public class User implements BaseEntity<Long> {
     public void addOrder(Order order) {
         orders.add(order);
         order.setUser(this);
-    }
-
-    public void addRole(Role role) {
-        roles.add(role);
-        role.getUsers().add(this);
     }
 
     @Override
@@ -131,12 +121,12 @@ public class User implements BaseEntity<Long> {
         this.lastName = lastName;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override
@@ -148,12 +138,13 @@ public class User implements BaseEntity<Long> {
                 && Objects.equals(username, user.username)
                 && Objects.equals(password, user.password)
                 && Objects.equals(firstName, user.firstName)
-                && Objects.equals(lastName, user.lastName);
+                && Objects.equals(lastName, user.lastName)
+                && role == user.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, firstName, lastName);
+        return Objects.hash(id, username, password, firstName, lastName, role);
     }
 
     @Override
@@ -164,6 +155,7 @@ public class User implements BaseEntity<Long> {
                 + ", password='" + password + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
+                + ", role=" + role
                 + '}';
     }
 
@@ -173,7 +165,6 @@ public class User implements BaseEntity<Long> {
         private String password;
         private String firstName;
         private String lastName;
-        private List<Role> roles = new ArrayList<>();
         private List<Order> orders = new ArrayList<>();
 
         public UserBuilder setId(Long id) {
@@ -201,18 +192,13 @@ public class User implements BaseEntity<Long> {
             return this;
         }
 
-        public UserBuilder setRoles(List<Role> roles) {
-            this.roles = roles;
-            return this;
-        }
-
         public UserBuilder setOrders(List<Order> orders) {
             this.orders = orders;
             return this;
         }
 
         public User build() {
-            return new User(id, username, password, firstName, lastName, roles, orders);
+            return new User(id, username, password, firstName, lastName, orders);
         }
     }
 }
