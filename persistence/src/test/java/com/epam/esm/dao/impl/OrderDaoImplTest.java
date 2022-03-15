@@ -3,6 +3,7 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.OrderDao;
 import com.epam.esm.dao.config.DaoTestConfig;
 import com.epam.esm.entity.Order;
+import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ class OrderDaoImplTest {
     @Tag("findByUser")
     void shouldFindOrdersByTheGivenUser() {
         Long userId = 1L;
-        User user = new User(userId, "dummy");
+        User user = new User(userId, "dummy", "dummy", "dummy", "dummy", Role.CLIENT);
         List<Order> list = entityManager.createQuery("FROM Order WHERE user = :user", Order.class)
                 .setParameter("user", user)
                 .getResultList();
@@ -68,7 +69,7 @@ class OrderDaoImplTest {
     @Tag("findByUser")
     void shouldReturnEmptyPageIfNoSuchUser() {
         Long userId = 100L;
-        User user = new User(userId, "dummy");
+        User user = new User(userId, "dummy", "dummy", "dummy", "dummy", Role.CLIENT);
         Page<Order> expected = new PageImpl<>(Collections.emptyList(), DEFAULT_PAGEABLE, 0);
 
         Page<Order> actual = orderDao.findByUser(user, DEFAULT_PAGEABLE);
@@ -80,7 +81,8 @@ class OrderDaoImplTest {
     @Tag("findByUser")
     void shouldReturnEmptyPageOrdersByTheGivenUser() {
         Long userId = 4L;
-        User user = new User(userId, "dummy");
+        User user = new User(userId, "dummy", "dummy", "dummy", "dummy", Role.CLIENT);
+
         Page<Order> expected = new PageImpl<>(Collections.emptyList(), DEFAULT_PAGEABLE, 0);
 
         Page<Order> actual = orderDao.findByUser(user, DEFAULT_PAGEABLE);
@@ -93,7 +95,8 @@ class OrderDaoImplTest {
     void shouldReturnOrderByItsIdAndUser() {
         Long id = 1L;
         Long userId = 1L;
-        User user = new User(userId, "dummy");
+        User user = new User(userId, "dummy", "dummy", "dummy", "dummy", Role.CLIENT);
+
         Order order = entityManager.createQuery("FROM Order WHERE user = :user and id = :id", Order.class)
                 .setParameter("user", user)
                 .setParameter("id", id)
@@ -110,7 +113,7 @@ class OrderDaoImplTest {
     void shouldReturnEmptyOptionalIfNoSuchOrderIdByTheGivenUser() {
         Long id = 2L;
         Long userId = 1L;
-        User user = new User(userId, "dummy");
+        User user = new User(userId, "dummy", "dummy", "dummy", "dummy", Role.CLIENT);
 
         Optional<Order> actual = orderDao.findByUserAndId(user, id);
 
@@ -122,7 +125,7 @@ class OrderDaoImplTest {
     void shouldReturnEmptyOptionalIfNoSuchUser() {
         Long id = 2L;
         Long userId = 100L;
-        User user = new User(userId, "dummy");
+        User user = new User(userId, "dummy", "dummy", "dummy", "dummy", Role.CLIENT);
 
         Optional<Order> actual = orderDao.findByUserAndId(user, id);
 
@@ -134,7 +137,7 @@ class OrderDaoImplTest {
     void shouldReturnEmptyOptionalIfNoSuchUserAndOrderId() {
         Long id = 200L;
         Long userId = 100L;
-        User user = new User(userId, "dummy");
+        User user = new User(userId, "dummy", "dummy", "dummy", "dummy", Role.CLIENT);
 
         Optional<Order> actual = orderDao.findByUserAndId(user, id);
 
@@ -145,7 +148,7 @@ class OrderDaoImplTest {
     @MethodSource("dataForCountByUser")
     @Tag("countByUser")
     void shouldCountOrderByTheGivenUser(Long userId, long expected) {
-        User user = new User(userId, "dummy");
+        User user = new User(userId, "dummy", "dummy", "dummy", "dummy", Role.CLIENT);
 
         long actual = orderDao.countByUser(user);
 
