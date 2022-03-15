@@ -45,21 +45,24 @@ public class User implements BaseEntity<Long> {
     public User() {
     }
 
-    public User(Long id, String username, String password, String firstName, String lastName, List<Order> orders) {
+    public User(Long id, String username, String password, String firstName,
+                String lastName, Role role, List<Order> orders) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.role = role;
         this.orders = orders;
     }
 
-    public User(Long id, String username, String password, String firstName, String lastName) {
+    public User(Long id, String username, String password, String firstName, String lastName, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.role = role;
     }
 
     public static UserBuilder builder() {
@@ -165,40 +168,46 @@ public class User implements BaseEntity<Long> {
         private String password;
         private String firstName;
         private String lastName;
+        private Role role;
         private List<Order> orders = new ArrayList<>();
 
-        public UserBuilder setId(Long id) {
+        public UserBuilder id(Long id) {
             this.id = id;
             return this;
         }
 
-        public UserBuilder setUsername(String username) {
+        public UserBuilder username(String username) {
             this.username = username;
             return this;
         }
 
-        public UserBuilder setPassword(String password) {
+        public UserBuilder password(String password) {
             this.password = password;
             return this;
         }
 
-        public UserBuilder setFirstName(String firstName) {
+        public UserBuilder firstName(String firstName) {
             this.firstName = firstName;
             return this;
         }
 
-        public UserBuilder setLastName(String lastName) {
+        public UserBuilder lastName(String lastName) {
             this.lastName = lastName;
             return this;
         }
 
-        public UserBuilder setOrders(List<Order> orders) {
+        public UserBuilder role(Role role) {
+            this.role = role;
+            return this;
+        }
+
+        public UserBuilder orders(List<Order> orders) {
             this.orders = orders;
             return this;
         }
 
         public User build() {
-            return new User(id, username, password, firstName, lastName, orders);
+            return new User(id, username, password, firstName, lastName, role, orders);
         }
     }
 }
