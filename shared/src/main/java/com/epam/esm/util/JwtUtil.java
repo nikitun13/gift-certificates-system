@@ -7,9 +7,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-import java.security.Key;
+import javax.annotation.PostConstruct;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
@@ -26,28 +25,29 @@ public class JwtUtil {
     @Value("${jwt.util.iss}")
     private String issuer;
 
+    @PostConstruct
+    private void init() {
+        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+    }
+
     public String createJwt(String subject) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date expiration = new Date(nowMillis + expirationMillis);
-
-        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(secretKey);
-        Key signingKey = new SecretKeySpec(apiKeySecretBytes, SIGNATURE_ALGORITHM.getJcaName());
 
         JwtBuilder builder = Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .setSubject(subject)
                 .setIssuer(issuer)
-                .signWith(SIGNATURE_ALGORITHM, signingKey);
+                .signWith(SIGNATURE_ALGORITHM, secretKey);
 
         return builder.compact();
     }
 
     public Claims decodeJwt(String jwt) {
-        byte[] key = DatatypeConverter.parseBase64Binary(secretKey);
         return Jwts.parser()
-                .setSigningKey(key)
+                .setSigningKey(secretKey)
                 .parseClaimsJws(jwt)
                 .getBody();
     }
