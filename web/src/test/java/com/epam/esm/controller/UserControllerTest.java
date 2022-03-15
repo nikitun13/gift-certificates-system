@@ -1,14 +1,19 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.congif.ControllerTestConfiguration;
 import com.epam.esm.dto.CreateOrderDetailDto;
 import com.epam.esm.dto.CreateOrderDto;
+import com.epam.esm.dto.CreateUserDto;
 import com.epam.esm.dto.DetailedOrderDto;
+import com.epam.esm.dto.LoginUserDto;
 import com.epam.esm.dto.OrderDetailDto;
 import com.epam.esm.dto.OrderDto;
+import com.epam.esm.dto.UserDetailsDto;
 import com.epam.esm.dto.UserDto;
+import com.epam.esm.entity.Role;
 import com.epam.esm.service.OrderService;
+import com.epam.esm.service.UserAuthenticationService;
 import com.epam.esm.service.UserService;
-import com.epam.esm.util.PaginationUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -22,12 +27,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.epam.esm.controller.handler.CustomStatus.BAD_CREDENTIALS;
 import static com.epam.esm.controller.handler.CustomStatus.ENTITY_NOT_FOUND;
 import static com.epam.esm.controller.handler.CustomStatus.METHOD_ARGUMENT_NOT_VALID;
 import static org.hamcrest.Matchers.endsWith;
@@ -36,6 +46,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,7 +55,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(PaginationUtil.class)
+@Import(ControllerTestConfiguration.class)
+@WithMockUser(roles = "ADMIN")
 @WebMvcTest(UserController.class)
 class UserControllerTest {
 
@@ -57,15 +69,18 @@ class UserControllerTest {
     @MockBean
     private OrderService orderService;
 
+    @MockBean
+    private UserAuthenticationService userAuthenticationService;
+
     private static final String USERS_URI = "/users";
     private static final String USER_ORDERS_URI = USERS_URI + "/{id}/orders";
 
     @Test
     @Tag("findAll")
     void shouldReturn200ForFindAllWithDefaultPageable() throws Exception {
-        UserDto first = new UserDto(1L, "first");
-        UserDto second = new UserDto(2L, "second");
-        UserDto third = new UserDto(3L, "third");
+        UserDto first = new UserDto(1L, "first", "dummy", "dummy");
+        UserDto second = new UserDto(2L, "second", "dummy", "dummy");
+        UserDto third = new UserDto(3L, "third", "dummy", "dummy");
         PageRequest pageable = PageRequest.of(0, 20);
         Page<UserDto> page = new PageImpl<>(List.of(first, second, third), pageable, 3);
         doReturn(page)
@@ -89,7 +104,7 @@ class UserControllerTest {
     @Tag("findById")
     void shouldReturnUserIfExists() throws Exception {
         Long id = 2L;
-        UserDto second = new UserDto(2L, "second");
+        UserDto second = new UserDto(2L, "second", "dummy", "dummy");
         doReturn(Optional.of(second))
                 .when(userService)
                 .findById(id);
@@ -244,5 +259,96 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.errorCode", is(METHOD_ARGUMENT_NOT_VALID.getValue())));
+    }
+
+    @Test
+    @Tag("create")
+    void shouldReturnCreatedForValidEntity() throws Exception {
+        CreateUserDto createUserDto = new CreateUserDto("ivan", "pass", "Ivan", "Ivanov");
+        Long newId = 6L;
+        UserDto dto = new UserDto(newId, createUserDto.username(), createUserDto.firstName(), createUserDto.lastName());
+        doReturn(dto)
+                .when(userAuthenticationService)
+                .signUp(createUserDto);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(createUserDto);
+
+        mvc.perform(post(USERS_URI).contentType(APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.LOCATION, endsWith(USERS_URI + "/" + dto.id())));
+    }
+
+    @Test
+    @Tag("create")
+    void shouldReturn400IfInvalidEntityReceived() throws Exception {
+        CreateUserDto invalidCreateUserDto = new CreateUserDto("iv", "pa", "", "Ivanov");
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(invalidCreateUserDto);
+
+        mvc.perform(post(USERS_URI).contentType(APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.errorCode", is(METHOD_ARGUMENT_NOT_VALID.getValue())));
+    }
+
+    @Test
+    @Tag("login")
+    void shouldReturn200ForValidUserCredentials() throws Exception {
+        LoginUserDto loginUserDto = new LoginUserDto("ivan", "pass");
+        Long id = 6L;
+        UserDetails dto = new UserDetailsDto(id, loginUserDto.username(), "encodedPass", "Ivan", "Ivanov", Role.CLIENT);
+        doReturn(dto)
+                .when(userAuthenticationService)
+                .login(loginUserDto);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(loginUserDto);
+
+        mvc.perform(post(USERS_URI + "/login").contentType(APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.AUTHORIZATION));
+    }
+
+    @Test
+    @Tag("login")
+    void shouldReturn400IfInvalidLoginUserReceived() throws Exception {
+        LoginUserDto loginUserDto = new LoginUserDto("iv", "p");
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(loginUserDto);
+
+        mvc.perform(post(USERS_URI + "/login").contentType(APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.errorCode", is(METHOD_ARGUMENT_NOT_VALID.getValue())));
+    }
+
+    @Test
+    @Tag("login")
+    void shouldReturn401IfBadUserCredentialsReceived() throws Exception {
+        LoginUserDto loginUserDto = new LoginUserDto("ivan", "invalidPass");
+        doThrow(BadCredentialsException.class)
+                .when(userAuthenticationService)
+                .login(loginUserDto);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(loginUserDto);
+
+        mvc.perform(post(USERS_URI + "/login").contentType(APPLICATION_JSON).content(requestJson))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.errorCode", is(BAD_CREDENTIALS.getValue())));
     }
 }

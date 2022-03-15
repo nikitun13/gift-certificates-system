@@ -1,10 +1,11 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.congif.ControllerTestConfiguration;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.GiftCertificateFilters;
 import com.epam.esm.dto.UpdateGiftCertificateDto;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.util.PaginationUtil;
+import com.epam.esm.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -41,7 +43,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(PaginationUtil.class)
+@Import(ControllerTestConfiguration.class)
+@WithMockUser(roles = "ADMIN")
 @WebMvcTest(GiftCertificateController.class)
 class GiftCertificateControllerTest {
 
@@ -52,6 +55,9 @@ class GiftCertificateControllerTest {
 
     @MockBean
     private GiftCertificateService service;
+
+    @MockBean
+    private UserService userService;
 
     @Test
     @Tag("findAll")
