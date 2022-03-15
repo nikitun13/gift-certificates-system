@@ -28,10 +28,10 @@ class UserMapperTest {
 
     public static Stream<Arguments> userToUserDtoData() {
         return Stream.of(
-                Arguments.of(new User(null, null), new UserDto(null, null)),
-                Arguments.of(new User(1L, null), new UserDto(1L, null)),
-                Arguments.of(new User(null, "dummy"), new UserDto(null, "dummy")),
-                Arguments.of(new User(1L, "dummy"), new UserDto(1L, "dummy"))
+                Arguments.of(User.builder().build(), new UserDto(null, null, null, null)),
+                Arguments.of(User.builder().id(1L).build(), new UserDto(1L, null, null, null)),
+                Arguments.of(User.builder().username("dummy").build(), new UserDto(null, "dummy", null, null)),
+                Arguments.of(User.builder().id(1L).username("dummy").build(), new UserDto(1L, "dummy", null, null))
         );
     }
 
