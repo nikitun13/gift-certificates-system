@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.UserDao;
+import com.epam.esm.dto.UserDetailsDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.User;
 import com.epam.esm.mapper.UserMapper;
@@ -14,11 +15,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,14 +37,18 @@ class UserServiceImplTest {
     @Mock
     private UserMapper mapper;
 
-    private User carl = new User(5L, "carl");
-    private UserDto carlDto = new UserDto(5L, "carl");
+    private User carl = User.builder().id(5L).username("carl").firstName("Carl").lastName("Fives").build();
+    private UserDto carlDto = new UserDto(5L, "carl", "Card", "Fives");
 
     @Test
     @Tag("findAll")
     void shouldDelegateToDaoFindAllAndResultToMapper() {
-        User nick = new User(3L, "nick");
-        UserDto nickDto = new UserDto(3L, "nick");
+        Long id = 3L;
+        String username = "nick";
+        String lastName = "Third";
+        String firstName = "Nick";
+        User nick = User.builder().id(id).username(username).firstName(firstName).lastName(lastName).build();
+        UserDto nickDto = new UserDto(id, username, firstName, lastName);
         Pageable pageable = PageRequest.of(0, 20);
         List<User> users = List.of(carl, nick);
         Page<User> page = new PageImpl<>(users, pageable, users.size());
@@ -76,5 +84,34 @@ class UserServiceImplTest {
         Optional<UserDto> actual = service.findById(id);
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    @Tag("loadUserByUsername")
+    void shouldReturnUserDetailsByExistingUsername() {
+        String username = carl.getUsername();
+        UserDetailsDto expected = new UserDetailsDto(carl.getId(), carl.getUsername(), carl.getPassword(), carl.getFirstName(), carl.getLastName(), carl.getRole());
+        doReturn(Optional.of(carl))
+                .when(dao)
+                .findByUsername(username);
+        doReturn(expected)
+                .when(mapper)
+                .toUserDetailsDto(carl);
+
+        UserDetails actual = service.loadUserByUsername(username);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    @Tag("loadUserByUsername")
+    void shouldThrowUsernameNotFoundExceptionIfNoSuchUsername() {
+        String username = "noSuchUsername";
+        doReturn(Optional.empty())
+                .when(dao)
+                .findByUsername(username);
+
+        assertThatThrownBy(() -> service.loadUserByUsername(username))
+                .isExactlyInstanceOf(UsernameNotFoundException.class);
     }
 }
