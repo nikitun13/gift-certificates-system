@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 public record UserDetailsDto(Long id,
-                             String username,
+                             String email,
                              String password,
                              String firstName,
                              String lastName,
@@ -25,7 +25,7 @@ public record UserDetailsDto(Long id,
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override

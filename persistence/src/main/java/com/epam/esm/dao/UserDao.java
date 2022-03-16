@@ -14,11 +14,11 @@ import java.util.Optional;
 public interface UserDao extends BaseDao<Long, User> {
 
     /**
-     * Finds {@link User} by {@code username}.
+     * Finds {@link User} by {@code email}.
      *
-     * @param username {@code username} of the {@link User}.
-     * @return Optional {@link User}. If the given {@code username} exists,
+     * @param email {@code email} of the {@link User}.
+     * @return Optional {@link User}. If the given {@code email} exists,
      * {@link Optional} contains corresponding user, empty {@link Optional} otherwise.
      */
-    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
 }

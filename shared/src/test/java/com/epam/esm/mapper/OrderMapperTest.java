@@ -73,7 +73,7 @@ class OrderMapperTest {
     @Test
     @Tag("toDetailedOrderDto")
     void toDetailedOrderDto() {
-        User user = User.builder().id(6L).username("username").build();
+        User user = User.builder().id(6L).email("email").build();
         LocalDateTime now = LocalDateTime.now();
         Order order = new Order(1L, user, now, now, 5432L);
         OrderDetail firstDetail = new OrderDetail(

@@ -33,7 +33,7 @@ class UserDaoImplTest {
         String username = "nick";
         User user = User.builder()
                 .id(3L)
-                .username(username)
+                .email(username)
                 .password("$2a$10$t7Yelc6KO8lOcOQUd1eYDOl/T6LxVPWwee4DlMTSdNOrSo.JZ9cNq")
                 .firstName("Nick")
                 .lastName("Third")
@@ -41,7 +41,7 @@ class UserDaoImplTest {
                 .build();
         Optional<User> expected = Optional.of(user);
 
-        Optional<User> actual = userDao.findByUsername(username);
+        Optional<User> actual = userDao.findByEmail(username);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -51,7 +51,7 @@ class UserDaoImplTest {
     void shouldReturnEmptyOptionalIfNoSuchUsername() {
         String username = "noSuchUsername";
 
-        Optional<User> actual = userDao.findByUsername(username);
+        Optional<User> actual = userDao.findByEmail(username);
 
         assertThat(actual).isEmpty();
     }

@@ -30,8 +30,8 @@ class UserMapperTest {
         return Stream.of(
                 Arguments.of(User.builder().build(), new UserDto(null, null, null, null)),
                 Arguments.of(User.builder().id(1L).build(), new UserDto(1L, null, null, null)),
-                Arguments.of(User.builder().username("dummy").build(), new UserDto(null, "dummy", null, null)),
-                Arguments.of(User.builder().id(1L).username("dummy").build(), new UserDto(1L, "dummy", null, null))
+                Arguments.of(User.builder().email("dummy").build(), new UserDto(null, "dummy", null, null)),
+                Arguments.of(User.builder().id(1L).email("dummy").build(), new UserDto(1L, "dummy", null, null))
         );
     }
 

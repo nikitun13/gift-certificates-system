@@ -49,7 +49,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     @Override
     public UserDetails login(LoginUserDto loginUserDto) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                loginUserDto.username(), loginUserDto.password());
+                loginUserDto.email(), loginUserDto.password());
         Authentication authenticate = authenticationManager.authenticate(authentication);
         return (UserDetails) authenticate.getPrincipal();
     }

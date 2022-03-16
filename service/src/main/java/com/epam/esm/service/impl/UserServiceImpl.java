@@ -39,8 +39,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return dao.findByUsername(username)
+        return dao.findByEmail(username)
                 .map(mapper::toUserDetailsDto)
-                .orElseThrow(() -> new UsernameNotFoundException("No such user with the username: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("No such user with the email: " + username));
     }
 }

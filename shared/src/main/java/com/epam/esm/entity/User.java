@@ -23,9 +23,8 @@ public class User implements BaseEntity<Long> {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String username;
+    private String email;
 
-    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -45,10 +44,10 @@ public class User implements BaseEntity<Long> {
     public User() {
     }
 
-    public User(Long id, String username, String password, String firstName,
+    public User(Long id, String email, String password, String firstName,
                 String lastName, Role role, List<Order> orders) {
         this.id = id;
-        this.username = username;
+        this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -56,9 +55,9 @@ public class User implements BaseEntity<Long> {
         this.orders = orders;
     }
 
-    public User(Long id, String username, String password, String firstName, String lastName, Role role) {
+    public User(Long id, String email, String password, String firstName, String lastName, Role role) {
         this.id = id;
-        this.username = username;
+        this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -84,12 +83,12 @@ public class User implements BaseEntity<Long> {
         return id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
     public List<Order> getOrders() {
@@ -138,7 +137,7 @@ public class User implements BaseEntity<Long> {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return Objects.equals(id, user.id)
-                && Objects.equals(username, user.username)
+                && Objects.equals(email, user.email)
                 && Objects.equals(password, user.password)
                 && Objects.equals(firstName, user.firstName)
                 && Objects.equals(lastName, user.lastName)
@@ -147,14 +146,14 @@ public class User implements BaseEntity<Long> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, firstName, lastName, role);
+        return Objects.hash(id, email, password, firstName, lastName, role);
     }
 
     @Override
     public String toString() {
         return "User{"
                 + "id=" + id
-                + ", username='" + username + '\''
+                + ", email='" + email + '\''
                 + ", password='" + password + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
@@ -164,7 +163,7 @@ public class User implements BaseEntity<Long> {
 
     public static class UserBuilder {
         private Long id;
-        private String username;
+        private String email;
         private String password;
         private String firstName;
         private String lastName;
@@ -176,8 +175,8 @@ public class User implements BaseEntity<Long> {
             return this;
         }
 
-        public UserBuilder username(String username) {
-            this.username = username;
+        public UserBuilder email(String username) {
+            this.email = username;
             return this;
         }
 
@@ -207,7 +206,7 @@ public class User implements BaseEntity<Long> {
         }
 
         public User build() {
-            return new User(id, username, password, firstName, lastName, role, orders);
+            return new User(id, email, password, firstName, lastName, role, orders);
         }
     }
 }

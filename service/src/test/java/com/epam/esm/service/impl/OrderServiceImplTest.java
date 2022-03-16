@@ -55,7 +55,7 @@ class OrderServiceImplTest {
     void shouldDelegateFindByIdToDaoAndThenMappingToMapper() {
         LocalDateTime now = LocalDateTime.now();
         Long userId = 5L;
-        User user = User.builder().id(userId).username("user").build();
+        User user = User.builder().id(userId).email("user").build();
         Order first = new Order(1L, user, now, now, 5432L);
         Order second = new Order(2L, user, now, now, 12345L);
         List<Order> orders = List.of(first, second);
@@ -102,7 +102,7 @@ class OrderServiceImplTest {
         LocalDateTime now = LocalDateTime.now();
         Long userId = 5L;
         Long id = 2L;
-        User user = User.builder().id(userId).username("user").build();
+        User user = User.builder().id(userId).email("user").build();
         Order order = new Order(id, user, now, now, 5432L);
         OrderDetail first = new OrderDetail(1L, GiftCertificate.builder().id(5L).build(), order, 432L, 2);
         OrderDetail second = new OrderDetail(4L, GiftCertificate.builder().id(3L).build(), order, 245L, 5);
@@ -150,7 +150,7 @@ class OrderServiceImplTest {
     void shouldReturnEmptyOptionalIfNoSuchOrderIdForTheGivenUser() {
         Long userId = 5L;
         Long id = 200L;
-        User user = User.builder().id(userId).username("user").build();
+        User user = User.builder().id(userId).email("user").build();
         doReturn(Optional.of(user))
                 .when(userDao)
                 .findById(userId);
@@ -167,7 +167,7 @@ class OrderServiceImplTest {
     @Tag("create")
     void shouldDelegateToDaosAndCountTotalPrice() {
         Long userId = 5L;
-        User user = User.builder().id(userId).username("user").build();
+        User user = User.builder().id(userId).email("user").build();
         Long firstCertificateId = 3L;
         Long secondCertificateId = 5L;
         GiftCertificate firstCertificate = GiftCertificate.builder().id(firstCertificateId).price(100L).build();
@@ -256,7 +256,7 @@ class OrderServiceImplTest {
     @Tag("create")
     void shouldThrowEntityNotFoundIfNoGiftCertificateIdForCreateMethod() {
         Long userId = 5L;
-        User user = User.builder().id(userId).username("user").build();
+        User user = User.builder().id(userId).email("user").build();
         Long firstCertificateId = 300L;
         CreateOrderDetailDto firstDetailDto = new CreateOrderDetailDto(firstCertificateId, 2);
         Order order = new Order(null, user, null, null, null);

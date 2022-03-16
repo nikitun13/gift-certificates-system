@@ -37,8 +37,8 @@ class UserServiceImplTest {
     @Mock
     private UserMapper mapper;
 
-    private User carl = User.builder().id(5L).username("carl").firstName("Carl").lastName("Fives").build();
-    private UserDto carlDto = new UserDto(5L, "carl", "Card", "Fives");
+    private final User carl = User.builder().id(5L).email("carl").firstName("Carl").lastName("Fives").build();
+    private final UserDto carlDto = new UserDto(5L, "carl", "Card", "Fives");
 
     @Test
     @Tag("findAll")
@@ -47,7 +47,7 @@ class UserServiceImplTest {
         String username = "nick";
         String lastName = "Third";
         String firstName = "Nick";
-        User nick = User.builder().id(id).username(username).firstName(firstName).lastName(lastName).build();
+        User nick = User.builder().id(id).email(username).firstName(firstName).lastName(lastName).build();
         UserDto nickDto = new UserDto(id, username, firstName, lastName);
         Pageable pageable = PageRequest.of(0, 20);
         List<User> users = List.of(carl, nick);
@@ -89,11 +89,11 @@ class UserServiceImplTest {
     @Test
     @Tag("loadUserByUsername")
     void shouldReturnUserDetailsByExistingUsername() {
-        String username = carl.getUsername();
-        UserDetailsDto expected = new UserDetailsDto(carl.getId(), carl.getUsername(), carl.getPassword(), carl.getFirstName(), carl.getLastName(), carl.getRole());
+        String username = carl.getEmail();
+        UserDetailsDto expected = new UserDetailsDto(carl.getId(), carl.getEmail(), carl.getPassword(), carl.getFirstName(), carl.getLastName(), carl.getRole());
         doReturn(Optional.of(carl))
                 .when(dao)
-                .findByUsername(username);
+                .findByEmail(username);
         doReturn(expected)
                 .when(mapper)
                 .toUserDetailsDto(carl);
@@ -109,7 +109,7 @@ class UserServiceImplTest {
         String username = "noSuchUsername";
         doReturn(Optional.empty())
                 .when(dao)
-                .findByUsername(username);
+                .findByEmail(username);
 
         assertThatThrownBy(() -> service.loadUserByUsername(username))
                 .isExactlyInstanceOf(UsernameNotFoundException.class);

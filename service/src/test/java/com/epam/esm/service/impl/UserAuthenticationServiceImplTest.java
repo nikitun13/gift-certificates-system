@@ -53,7 +53,7 @@ class UserAuthenticationServiceImplTest {
                 .encode(createUserDto.password());
         User mappedUser = User.builder()
                 .id(id)
-                .username(createUserDto.username())
+                .email(createUserDto.email())
                 .password(createUserDto.password())
                 .firstName(createUserDto.firstName())
                 .lastName(createUserDto.lastName())
@@ -63,13 +63,13 @@ class UserAuthenticationServiceImplTest {
                 .toUser(createUserDto);
         User user = User.builder()
                 .id(id)
-                .username(createUserDto.username())
+                .email(createUserDto.email())
                 .password(encodedPassword)
                 .firstName(createUserDto.firstName())
                 .lastName(createUserDto.lastName())
                 .role(Role.CLIENT)
                 .build();
-        UserDto expected = new UserDto(id, user.getUsername(), user.getFirstName(), user.getLastName());
+        UserDto expected = new UserDto(id, user.getEmail(), user.getFirstName(), user.getLastName());
         doReturn(expected)
                 .when(mapper)
                 .toUserDto(user);
@@ -85,7 +85,7 @@ class UserAuthenticationServiceImplTest {
     void shouldAuthenticateUser() {
         LoginUserDto loginUserDto = new LoginUserDto("nick", "pass");
         UserDetailsDto expected = new UserDetailsDto(4L, "nick", "encodedPassword", "Nick", "Henson", Role.CLIENT);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(loginUserDto.username(), loginUserDto.password());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(loginUserDto.email(), loginUserDto.password());
         Authentication authResult = new UsernamePasswordAuthenticationToken(expected, null);
         doReturn(authResult)
                 .when(authenticationManager)

@@ -96,7 +96,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.page.number", is(0)))
                 .andExpect(jsonPath("$._embedded.userDtoList", hasSize(3)))
                 .andExpect(jsonPath("$._embedded.userDtoList[0].id", is(first.id()), Long.class))
-                .andExpect(jsonPath("$._embedded.userDtoList[0].username", is(first.username())))
+                .andExpect(jsonPath("$._embedded.userDtoList[0].email", is(first.email())))
                 .andExpect(jsonPath("$._links", not(nullValue())));
     }
 
@@ -113,7 +113,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(id), Long.class))
-                .andExpect(jsonPath("$.username", is(second.username())))
+                .andExpect(jsonPath("$.email", is(second.email())))
                 .andExpect(jsonPath("$._links", not(nullValue())));
     }
 
@@ -266,7 +266,7 @@ class UserControllerTest {
     void shouldReturnCreatedForValidEntity() throws Exception {
         CreateUserDto createUserDto = new CreateUserDto("ivan", "pass", "Ivan", "Ivanov");
         Long newId = 6L;
-        UserDto dto = new UserDto(newId, createUserDto.username(), createUserDto.firstName(), createUserDto.lastName());
+        UserDto dto = new UserDto(newId, createUserDto.email(), createUserDto.firstName(), createUserDto.lastName());
         doReturn(dto)
                 .when(userAuthenticationService)
                 .signUp(createUserDto);
@@ -302,7 +302,7 @@ class UserControllerTest {
     void shouldReturn200ForValidUserCredentials() throws Exception {
         LoginUserDto loginUserDto = new LoginUserDto("ivan", "pass");
         Long id = 6L;
-        UserDetails dto = new UserDetailsDto(id, loginUserDto.username(), "encodedPass", "Ivan", "Ivanov", Role.CLIENT);
+        UserDetails dto = new UserDetailsDto(id, loginUserDto.email(), "encodedPass", "Ivan", "Ivanov", Role.CLIENT);
         doReturn(dto)
                 .when(userAuthenticationService)
                 .login(loginUserDto);
