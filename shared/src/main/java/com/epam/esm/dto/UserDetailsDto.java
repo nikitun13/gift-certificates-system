@@ -2,7 +2,6 @@ package com.epam.esm.dto;
 
 import com.epam.esm.entity.Role;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +11,7 @@ public record UserDetailsDto(Long id,
                              String password,
                              String firstName,
                              String lastName,
-                             Role role) implements UserDetails {
+                             Role role) implements CustomUserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(role);
@@ -46,5 +45,10 @@ public record UserDetailsDto(Long id,
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
     }
 }
