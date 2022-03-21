@@ -7,8 +7,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.Base64;
 import java.util.Date;
 
 @Component
@@ -24,11 +22,6 @@ public class JwtUtil {
 
     @Value("${jwt.util.iss}")
     private String issuer;
-
-    @PostConstruct
-    private void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-    }
 
     public String createJwt(String subject) {
         long nowMillis = System.currentTimeMillis();
