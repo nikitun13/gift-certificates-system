@@ -73,7 +73,7 @@ public class OktaJwtAuthenticationFilter extends OncePerRequestFilter {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof AnonymousAuthenticationToken) {
             extractAuthBearerHeader(request)
-                    .map(this::parseJwt)
+                    .map(this::requestOktaUserDetails)
                     .ifPresent(user -> authenticate(user, request));
         }
         filterChain.doFilter(request, response);
@@ -113,7 +113,7 @@ public class OktaJwtAuthenticationFilter extends OncePerRequestFilter {
         return new OktaUserDetailsDto(userDetailsDto, scopes);
     }
 
-    private OktaUserDto parseJwt(String jwt) {
+    private OktaUserDto requestOktaUserDetails(String jwt) {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>(2);
         body.add(TOKEN_KEY, jwt);
         body.add(TOKEN_TYPE_HINT_KEY, ACCESS_TOKEN);
