@@ -37,7 +37,7 @@ VALUES (1,1), (1,2), (1,3),
        (4,6), (4,7), (4,8), (4,9),(4,1),
        (5,1), (5,10), (5,11);
 
-INSERT INTO users(username,password,first_name,last_name,role)
+INSERT INTO users(email,password,first_name,last_name,role)
 VALUES ('alex','$2a$10$t7Yelc6KO8lOcOQUd1eYDOl/T6LxVPWwee4DlMTSdNOrSo.JZ9cNq','Alox','First','ADMIN'),
        ('john','$2a$10$t7Yelc6KO8lOcOQUd1eYDOl/T6LxVPWwee4DlMTSdNOrSo.JZ9cNq','John','Second','CLIENT'),
        ('nick','$2a$10$t7Yelc6KO8lOcOQUd1eYDOl/T6LxVPWwee4DlMTSdNOrSo.JZ9cNq','Nick','Third','CLIENT'),
