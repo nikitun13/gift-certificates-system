@@ -1,9 +1,10 @@
 package com.epam.esm.congif;
 
-import org.springframework.context.annotation.ComponentScan;
+import com.epam.esm.util.JpaUtil;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
-@ComponentScan("com.epam.esm.util")
+@Import(JpaUtil.class)
 public class ControllerTestConfiguration {
 }
