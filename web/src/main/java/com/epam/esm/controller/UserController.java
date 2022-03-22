@@ -115,7 +115,7 @@ public class UserController {
 
     @GetMapping("/{id}/orders")
     @PreAuthorize("hasRole(T(com.epam.esm.entity.Role).ADMIN) " +
-            "or ((hasRole(T(com.epam.esm.entity.Role).CLIENT) or hasAuthority('gcs.orders.read')) " +
+            "or ((hasRole(T(com.epam.esm.entity.Role).CLIENT) or hasAuthority('SCOPE_gcs.orders.read')) " +
             "and principal.id == #id)")
     public CollectionModel<?> findOrdersByUser(@PathVariable("id") Long id,
                                                Pageable pageable) {
@@ -135,7 +135,7 @@ public class UserController {
 
     @GetMapping("/{id}/orders/{orderId}")
     @PreAuthorize("hasRole(T(com.epam.esm.entity.Role).ADMIN) " +
-            "or ((hasRole(T(com.epam.esm.entity.Role).CLIENT) or hasAuthority('gcs.orders.read')) " +
+            "or ((hasRole(T(com.epam.esm.entity.Role).CLIENT) or hasAuthority('SCOPE_gcs.orders.read')) " +
             "and principal.id == #id)")
     public RepresentationModel<?> findDetailedOrderByUser(@PathVariable("id") Long id,
                                                           @PathVariable("orderId") Long orderId) {
@@ -150,7 +150,7 @@ public class UserController {
 
     @PostMapping(value = "/{id}/orders", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole(T(com.epam.esm.entity.Role).ADMIN) " +
-            "or ((hasRole(T(com.epam.esm.entity.Role).CLIENT) or hasAuthority('gcs.orders.write')) " +
+            "or ((hasRole(T(com.epam.esm.entity.Role).CLIENT) or hasAuthority('SCOPE_gcs.orders.write')) " +
             "and principal.id == #id)")
     public ResponseEntity<Void> createOrder(@PathVariable("id") Long id,
                                             @RequestBody @Valid CreateOrderDto createOrderDto) {
