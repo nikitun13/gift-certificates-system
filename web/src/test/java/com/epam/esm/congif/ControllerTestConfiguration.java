@@ -1,10 +1,17 @@
 package com.epam.esm.congif;
 
-import com.epam.esm.util.JpaUtil;
+import com.epam.esm.service.UserAuthenticationService;
+import org.mockito.Mockito;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(JpaUtil.class)
+@ComponentScan("com.epam.esm.util")
 public class ControllerTestConfiguration {
+
+    @Bean
+    public UserAuthenticationService userAuthenticationService() {
+        return Mockito.mock(UserAuthenticationService.class);
+    }
 }

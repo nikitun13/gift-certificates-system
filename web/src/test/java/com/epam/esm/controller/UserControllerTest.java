@@ -264,7 +264,7 @@ class UserControllerTest {
     @Test
     @Tag("create")
     void shouldReturnCreatedForValidEntity() throws Exception {
-        CreateUserDto createUserDto = new CreateUserDto("ivan", "pass", "Ivan", "Ivanov");
+        CreateUserDto createUserDto = new CreateUserDto("ivan@mail.ru", "pass", "Ivan", "Ivanov");
         Long newId = 6L;
         UserDto dto = new UserDto(newId, createUserDto.email(), createUserDto.firstName(), createUserDto.lastName());
         doReturn(dto)
@@ -300,7 +300,7 @@ class UserControllerTest {
     @Test
     @Tag("login")
     void shouldReturn200ForValidUserCredentials() throws Exception {
-        LoginUserDto loginUserDto = new LoginUserDto("ivan", "pass");
+        LoginUserDto loginUserDto = new LoginUserDto("ivan@mail.ru", "pass");
         Long id = 6L;
         UserDetails dto = new UserDetailsDto(id, loginUserDto.email(), "encodedPass", "Ivan", "Ivanov", Role.CLIENT);
         doReturn(dto)
@@ -336,7 +336,7 @@ class UserControllerTest {
     @Test
     @Tag("login")
     void shouldReturn401IfBadUserCredentialsReceived() throws Exception {
-        LoginUserDto loginUserDto = new LoginUserDto("ivan", "invalidPass");
+        LoginUserDto loginUserDto = new LoginUserDto("ivan@mail.ru", "invalidPass");
         doThrow(BadCredentialsException.class)
                 .when(userAuthenticationService)
                 .login(loginUserDto);
