@@ -1,9 +1,9 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.CreateOktaUserDto;
 import com.epam.esm.dto.CreateUserDto;
 import com.epam.esm.dto.LoginUserDto;
 import com.epam.esm.dto.OktaUserDetailsDto;
-import com.epam.esm.dto.OktaUserDto;
 import com.epam.esm.dto.UserDetailsDto;
 import com.epam.esm.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,10 +25,10 @@ public interface UserAuthenticationService {
     /**
      * Creates new {@code User} in the storage logged in from {@code Okta}.
      *
-     * @param oktaUserDto {@code dto} for creation new entity.
+     * @param createOktaUserDto {@code dto} for creation new entity.
      * @return created entity that mapped to {@link OktaUserDetailsDto}.
      */
-    UserDetailsDto signUp(OktaUserDto oktaUserDto);
+    UserDetailsDto signUp(CreateOktaUserDto createOktaUserDto);
 
     /**
      * Authenticates {@code user} using {@link LoginUserDto}.

@@ -3,7 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.CreateUserDto;
 import com.epam.esm.dto.LoginUserDto;
-import com.epam.esm.dto.OktaUserDto;
+import com.epam.esm.dto.CreateOktaUserDto;
 import com.epam.esm.dto.UserDetailsDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.User;
@@ -49,8 +49,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     }
 
     @Override
-    public UserDetailsDto signUp(OktaUserDto oktaUserDto) {
-        User user = mapper.toUser(oktaUserDto);
+    public UserDetailsDto signUp(CreateOktaUserDto createOktaUserDto) {
+        User user = mapper.toUser(createOktaUserDto);
         Role role = Role.CLIENT;
         user.setRole(role);
         dao.create(user);
