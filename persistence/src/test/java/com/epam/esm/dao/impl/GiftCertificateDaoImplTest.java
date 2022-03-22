@@ -22,7 +22,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = DaoTestConfig.class)
+@SpringBootTest(classes = DaoTestConfig.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
 @ActiveProfiles("test")
 class GiftCertificateDaoImplTest {
