@@ -1,21 +1,17 @@
 package com.epam.esm.dto;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
-import java.util.List;
 
 public record OktaUserDetailsDto(Long id,
                                  UserDetailsDto userDetails,
                                  Collection<? extends GrantedAuthority> scopes) implements CustomUserDetails {
 
-    public OktaUserDetailsDto(UserDetailsDto userDetails, List<String> scopes) {
+    public OktaUserDetailsDto(UserDetailsDto userDetails, Collection<? extends GrantedAuthority> scopes) {
         this(userDetails.id(),
                 userDetails,
-                scopes.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .toList()
+                scopes
         );
     }
 
