@@ -16,10 +16,18 @@ public class UserDaoImpl extends AbstractDao<Long, User> implements UserDao {
 
     @Override
     protected void setNotNullFieldsToManagedEntity(User managedEntity, User newEntity) {
-        var username = Optional.ofNullable(newEntity.getUsername());
+        var username = Optional.ofNullable(newEntity.getEmail());
         newEntity.getOrders()
                 .forEach(managedEntity::addOrder);
 
-        username.ifPresent(managedEntity::setUsername);
+        username.ifPresent(managedEntity::setEmail);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return entityManager.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
+                .setParameter("email", email)
+                .getResultStream()
+                .findFirst();
     }
 }

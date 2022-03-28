@@ -42,7 +42,7 @@ class OrderMapperTest {
     public static Stream<Arguments> orderToOrderDtoData() {
         LocalDateTime now = LocalDateTime.now();
         return Stream.of(
-                Arguments.of(new Order(1L, User.builder().setId(1L).build(), now, now, 5432L),
+                Arguments.of(new Order(1L, User.builder().id(1L).build(), now, now, 5432L),
                         new OrderDto(1L, now, now, 5432L)),
                 Arguments.of(new Order(null, null, null, null, null),
                         new OrderDto(null, null, null, null)),
@@ -73,7 +73,7 @@ class OrderMapperTest {
     @Test
     @Tag("toDetailedOrderDto")
     void toDetailedOrderDto() {
-        User user = new User(6L, "username");
+        User user = User.builder().id(6L).email("email").build();
         LocalDateTime now = LocalDateTime.now();
         Order order = new Order(1L, user, now, now, 5432L);
         OrderDetail firstDetail = new OrderDetail(
@@ -116,7 +116,7 @@ class OrderMapperTest {
     @Tag("toOrder")
     void shouldConvertToOrderIfDetailsAreEmpty() {
         CreateOrderDto dto = new CreateOrderDto(Collections.emptyList());
-        User user = new User(1L, "dummy");
+        User user = User.builder().id(1L).build();
         Order expected = new Order();
         expected.setUser(user);
 
@@ -132,7 +132,7 @@ class OrderMapperTest {
         CreateOrderDetailDto second = new CreateOrderDetailDto(5L, 2);
         CreateOrderDetailDto third = new CreateOrderDetailDto(2L, 1);
         CreateOrderDto dto = new CreateOrderDto(List.of(first, second, third));
-        User user = new User(1L, "dummy");
+        User user = User.builder().id(1L).build();
         Order expected = new Order();
         expected.setUser(user);
         OrderDetail firstDetail = new OrderDetail(

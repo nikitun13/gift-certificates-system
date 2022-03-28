@@ -13,6 +13,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -29,6 +34,34 @@ import static java.util.stream.Collectors.joining;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(BadCredentialsException.class)
+    protected ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
+        log.error("BadCredentialsException occurred", ex);
+        String message = ex.getMessage();
+        int customStatusCode = CustomStatus.BAD_CREDENTIALS.getValue();
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        return buildResponse(status, customStatusCode, message);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    protected ResponseEntity<Object> handleBadCredentialsException(AccessDeniedException ex) {
+        log.error("AccessDeniedException occurred", ex);
+        String message;
+        int customStatusCode;
+        HttpStatus status;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken) {
+            customStatusCode = CustomStatus.AUTHENTICATION_REQUIRED.getValue();
+            status = HttpStatus.UNAUTHORIZED;
+            message = "Authentication required";
+        } else {
+            customStatusCode = CustomStatus.ACCESS_DENIED.getValue();
+            status = HttpStatus.FORBIDDEN;
+            message = "No proper rights";
+        }
+        return buildResponse(status, customStatusCode, message);
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {

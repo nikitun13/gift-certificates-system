@@ -1,9 +1,10 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.congif.ControllerTestConfiguration;
 import com.epam.esm.dto.CreateTagDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.service.TagService;
-import com.epam.esm.util.PaginationUtil;
+import com.epam.esm.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -36,7 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(PaginationUtil.class)
+@Import(ControllerTestConfiguration.class)
+@WithMockUser(roles = "ADMIN")
 @WebMvcTest(TagController.class)
 class TagControllerTest {
 
@@ -47,6 +50,9 @@ class TagControllerTest {
 
     @MockBean
     private TagService tagService;
+
+    @MockBean
+    private UserService userService;
 
     @Test
     @Tag("findAll")
@@ -161,6 +167,36 @@ class TagControllerTest {
                 .delete(id);
 
         mvc.perform(get(TAGS_URI + "/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.errorCode", is(ENTITY_NOT_FOUND.getValue())));
+    }
+
+    @Test
+    @Tag("findTopTagOfUserWithTheHighestCostOfAllOrders")
+    void shouldReturn200IfTopTagPresent() throws Exception {
+        TagDto tagDto = new TagDto(5L, "top");
+        doReturn(Optional.of(tagDto))
+                .when(tagService)
+                .findTopTagOfUserWithTheHighestCostOfAllOrders();
+
+        mvc.perform(get(TAGS_URI + "/top"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(tagDto.id()), Long.class))
+                .andExpect(jsonPath("$.name", is(tagDto.name())));
+    }
+
+    @Test
+    @Tag("findTopTagOfUserWithTheHighestCostOfAllOrders")
+    void shouldReturn404IfTopTagIsAbsent() throws Exception {
+        doReturn(Optional.empty())
+                .when(tagService)
+                .findTopTagOfUserWithTheHighestCostOfAllOrders();
+
+        mvc.perform(get(TAGS_URI + "/top"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.errorCode", is(ENTITY_NOT_FOUND.getValue())));

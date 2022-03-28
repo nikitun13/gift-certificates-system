@@ -29,8 +29,12 @@ CREATE TABLE gift_certificate_tag
 
 CREATE TABLE users
 (
-    id       BIGSERIAL PRIMARY KEY,
-    username varchar(128) NOT NULL UNIQUE
+    id         BIGSERIAL PRIMARY KEY,
+    email      VARCHAR(256) NOT NULL UNIQUE,
+    password   CHAR(60),
+    first_name VARCHAR(256) NOT NULL,
+    last_name  VARCHAR(256) NOT NULL,
+    role       VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE orders

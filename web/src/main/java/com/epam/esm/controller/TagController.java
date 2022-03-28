@@ -15,6 +15,7 @@ import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/tags", produces = MediaType.APPLICATION_JSON_VALUE)
+@PreAuthorize("isAuthenticated()")
 public class TagController {
 
     private final TagService tagService;
@@ -66,6 +68,7 @@ public class TagController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole(T(com.epam.esm.entity.Role).ADMIN)")
     public ResponseEntity<Void> create(@Validated(GeneralConstraintsGroup.class)
                                        @RequestBody CreateTagDto createDto) {
         TagDto dto = tagService.create(createDto);
@@ -74,6 +77,7 @@ public class TagController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole(T(com.epam.esm.entity.Role).ADMIN)")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         boolean isDeleted = tagService.delete(id);
         if (isDeleted) {
