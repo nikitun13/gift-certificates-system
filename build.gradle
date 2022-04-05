@@ -12,9 +12,7 @@ wrapper {
     gradleVersion '7.3.3'
 }
 
-bootJar.enabled = false
-
-subprojects {
+allprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
@@ -22,14 +20,20 @@ subprojects {
     group 'com.epam'
     version '1.0-SNAPSHOT'
 
+    bootJar {
+        enabled = false
+    }
+
+    jar {
+        enabled = true
+    }
+
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 
     repositories {
         mavenCentral()
     }
-
-    bootJar.enabled = false
 
     dependencies {
         implementation 'org.apache.commons:commons-lang3'
