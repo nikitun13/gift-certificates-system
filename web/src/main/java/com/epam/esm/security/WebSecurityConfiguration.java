@@ -1,5 +1,6 @@
 package com.epam.esm.security;
 
+import com.epam.esm.entity.Role;
 import com.epam.esm.service.UserAuthenticationService;
 import com.epam.esm.service.UserService;
 import com.epam.esm.util.JwtUtil;
@@ -65,6 +66,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(authenticationEntryPoint()))
+                .authorizeRequests(requests -> requests
+                        .antMatchers("/actuator/**").hasRole(Role.ADMIN.name()))
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .opaqueToken(opaque -> opaque
                                 .introspector(opaqueTokenIntrospector(null))
